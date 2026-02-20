@@ -1,0 +1,316 @@
+/* ===============================
+   🎨 PALETA SERVIECO PERO EN PASTELES
+   =============================== */
+:root {
+  --verde: #e3f0e8;
+  --verde-light: #E9F7EF;
+
+  --azul: #6C9BD2;
+  --azul-light: #EEF4FB;
+
+  --violeta: #B39DDB;
+  --violeta-light: #f9effb;
+
+  --gris-texto: #4F4F4F;
+  --gris-borde: #E0E0E0;
+  --blanco: #ffffff;
+
+  --fondo-form: #ffffff; /* fondo claro para formularios */
+  --fondo-tabla: #ffffff; /* fondo tabla */
+  --texto-titulo: #1F3A5F; /* azul oscuro para títulos */
+}
+
+/* ===============================
+   RESET
+   =============================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+body {
+  background-color: var(--verde-light);
+  color: var(--gris-texto);
+}
+
+/* ===============================
+   CONTENEDOR
+   =============================== */
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 24px;
+}
+
+h1, h2, h3 {
+  color: var(--texto-titulo);
+  margin-bottom: 16px;
+}
+
+/* ===============================
+   FORMULARIOS / SECCIONES
+   =============================== */
+.form-card {
+  background: var(--fondo-form);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  margin-bottom: 32px;
+  border: 1px solid var(--gris-borde);
+}
+
+.form-card h2 {
+  margin-bottom: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+label {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  display: block;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--gris-borde);
+  background: var(--blanco);
+  color: var(--gris-texto);
+}
+
+input:disabled {
+  background: #F2F2F2;
+  font-weight: bold;
+}
+
+/* ===============================
+   BOTONES
+   =============================== */
+button {
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-verde {
+  background: var(--verde);
+  color: #1B4332;
+}
+
+.btn-azul {
+  background: var(--azul);
+  color: #1F3A5F;
+}
+
+.btn-violeta {
+  background: var(--violeta);
+  color: #3C096C;
+}
+
+/* ===============================
+   TABLA
+   =============================== */
+.table-card {
+  background: var(--fondo-tabla);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  border: 1px solid var(--gris-borde);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 12px;
+  background: var(--violeta-light);
+  color: var(--violeta);
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+tr:hover {
+  background: var(--verde-light);
+}
+
+/* ===============================
+   MODAL
+   =============================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--blanco);
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,.3);
+}
+
+.modal h3 {
+  color: var(--violeta);
+  margin-bottom: 16px;
+}
+
+/* ===============================
+   BADGES
+   =============================== */
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.badge-ingreso {
+  background: var(--verde-light);
+  color: var(--verde);
+}
+
+.badge-egreso {
+  background: var(--violeta-light);
+  color: var(--violeta);
+}
+
+.select-add {
+  display: flex;
+  gap: 6px;
+}
+
+.select-add button {
+  padding: 0 10px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* ===============================
+   styles para tabla de pesadas
+   =============================== */
+
+@media (max-width: 768px) {
+  .pesadas-table,
+  .pesadas-table thead,
+  .pesadas-table tbody,
+  .pesadas-table th,
+  .pesadas-table td,
+  .pesadas-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .pesadas-table thead {
+    display: none;
+  }
+
+  .pesadas-table tr {
+    background: var(--fondo-form);
+    margin-bottom: 16px;
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid var(--gris-borde);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  .pesadas-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border: none;
+  }
+
+  .pesadas-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--texto-titulo);
+  }
+
+  .pesadas-table td:last-child {
+    margin-top: 10px;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .pesadas-table td:last-child button {
+    width: 100%;
+  }
+}
+
+/* ===============================
+   styles para logo
+   =============================== */
+.logo-container {
+  width: 250px;      /* alto deseado */
+  overflow: hidden;  /* recorta bordes extras */
+  margin: 0 auto;
+}
+
+.logo-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* mantiene proporción, pero llena el contenedor */
+  display: block;
+}
+
+/* DATE */
+
+.floating-field {
+  position: relative;
+}
+
+.floating-field label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  color: #888;
+  background: white;
+  padding: 0 4px;
+  pointer-events: none;
+  transition: 0.2s;
+}
+
+.floating-field input {
+  padding: 14px 12px 10px;
+}
+
+.floating-field input:focus + label,
+.floating-field input:not(:placeholder-shown) + label {
+  top: -6px;
+  font-size: 0.7rem;
+  color: var(--azul);
+}
+
