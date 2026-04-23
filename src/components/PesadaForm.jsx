@@ -6,86 +6,109 @@ import EmpresaModal from "./EmpresaModal";
 import ChoferModal from "./ChoferModal";
 import MaterialModal from "./MaterialModal";
 import VehiculoModal from "./VehiculoModal";
-
-const ROLL_OFF_ID = 1;
+import CajaModal from "./CajaModal";
 
 export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
 
-  /* ================= LISTAS ================= */
   const [empresas, setEmpresas] = useState([]);
-  const [choferes, setChoferes] = useState([]);
+  const [personal, setPersonal] = useState([]);
   const [materiales, setMateriales] = useState([]);
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
   const [cajas, setCajas] = useState([]);
 
-  /* ================= MODALES ================= */
   const [showEmpresa, setShowEmpresa] = useState(false);
   const [showChofer, setShowChofer] = useState(false);
   const [showMaterial, setShowMaterial] = useState(false);
   const [showVehiculo, setShowVehiculo] = useState(false);
+  const [showCaja, setShowCaja] = useState(false);
 
-  /* ================= BALANZA ================= */
   const [pesoBalanza, setPesoBalanza] = useState(null);
   const [balanzaOk, setBalanzaOk] = useState(false);
+  const [passwordManual, setPasswordManual] = useState("");
+  const [motivoManual, setMotivoManual] = useState("");
 
-  /* ================= FORM ================= */
   const [form, setForm] = useState({
     tipo_movimiento: "INGRESO",
     origen: "BALANZA",
-
     empresa_id: "",
-    chofer_id: "",
+    personal_id: "",
     material_id: "",
-
     tipo_vehiculo_id: "",
     vehiculo_id: "",
     caja_id: "",
-
     peso: "",
   });
 
-  /* ================= CARGA INICIAL ================= */
+  // El tipo de vehículo seleccionado (objeto completo, para saber si tiene_caja)
+  const tipoVehiculoSeleccionado = tiposVehiculo.find(
+    t => t.id === Number(form.tipo_vehiculo_id)
+  );
+
+  const [tiposCaja, setTiposCaja] = useState([]);
+  const [tipoCajaSeleccionado, setTipoCajaSeleccionado] = useState(null);
+
   useEffect(() => {
-    api.get("/api/empresas").then(r => setEmpresas(r.data));
-    api.get("/api/choferes").then(r => setChoferes(r.data));
-    api.get("/api/materiales").then(r => setMateriales(r.data));
-    api.get("/api/tipos_vehiculo").then(r => setTiposVehiculo(r.data));
+    api.get("/empresas").then(r => setEmpresas(r.data));
+    api.get("/materiales").then(r => setMateriales(r.data));
+    api.get("/tipos_vehiculo").then(r => setTiposVehiculo(r.data));
+    api.get("/personal").then(r => {
+      console.log("Personal:", r.data);
+      setPersonal(r.data);
+    });
   }, []);
 
-  /* ================= VEHÍCULOS / CAJAS ================= */
   useEffect(() => {
     if (!form.tipo_vehiculo_id) {
       setVehiculos([]);
+      return;
+    }
+
+    console.log("Tipo seleccionado:", form.tipo_vehiculo_id);
+
+    api
+      .get("/vehiculos", { params: { tipo_vehiculo_id: form.tipo_vehiculo_id } })
+      .then(r => {
+        console.log("Vehiculos:", r.data);
+        setVehiculos(r.data);
+      })
+      .catch(() => setVehiculos([]));
+  }, [form.tipo_vehiculo_id]);
+
+  useEffect(() => {
+    if (!form.vehiculo_id) {
       setCajas([]);
       return;
     }
 
-    api.get("/api/vehiculos", {
-      params: { tipo_vehiculo_id: form.tipo_vehiculo_id },
-    }).then(r => setVehiculos(r.data));
-
-    if (Number(form.tipo_vehiculo_id) === ROLL_OFF_ID) {
-      api.get("/api/cajas").then(r => setCajas(r.data));
-    } else {
+    const vehiculoSeleccionado = vehiculos.find(v => v.id === Number(form.vehiculo_id));
+    if (!vehiculoSeleccionado) {
       setCajas([]);
+      return;
     }
 
-    setForm(f => ({
-      ...f,
-      vehiculo_id: "",
-      caja_id: "",
-    }));
-  }, [form.tipo_vehiculo_id]);
+    let params = { id: vehiculoSeleccionado.caja_id };
 
-  /* ================= LECTURA BALANZA ================= */
+    if (tipoCajaSeleccionado) {
+      params.tipo_caja_id = tipoCajaSeleccionado.id;
+    }
+
+    api.get("/cajas", { params })
+      .then(r => setCajas(r.data))
+      .catch(() => setCajas([]));
+  }, [form.vehiculo_id, vehiculos, tipoCajaSeleccionado]);
+
+
+  useEffect(() => {
+    api.get("/tipos_caja").then(r => setTiposCaja(r.data));
+  }, []);
+
   useEffect(() => {
     if (form.origen !== "BALANZA" || !balanzaDisponible) return;
 
     const timer = setInterval(async () => {
       try {
-        const res = await api.get("/api/balanza/peso");
-
+        const res = await api.get("/balanza/peso");
         if (res.data?.disponible) {
           setPesoBalanza(res.data.peso_kg);
           setBalanzaOk(true);
@@ -102,312 +125,340 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
     return () => clearInterval(timer);
   }, [form.origen, balanzaDisponible]);
 
-  /* ================= HANDLERS ================= */
-  const handleChange = e => {
-    const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
-  };
 
-  const handleOrigenChange = e => {
-    const origen = e.target.value;
-
-    setForm(f => ({
-      ...f,
-      origen,
-      peso: "",
-    }));
-
+  const handleOrigenChange = valor => {
+    setForm(f => ({ ...f, origen: valor, peso: "" }));
     setPesoBalanza(null);
     setBalanzaOk(false);
   };
 
-  /* ================= SUBMIT ================= */
+  const handleTipoVehiculo = seleccionado => {
+    setForm(f => ({
+      ...f,
+      tipo_vehiculo_id: seleccionado?.value || "",
+      vehiculo_id: "",
+      caja_id: "",
+    }));
+  };
+
   const submit = async e => {
     e.preventDefault();
 
+    if (form.origen === "MANUAL") {
+      if (!passwordManual.trim()) return alert("Debe ingresar contraseña de autorización.");
+      if (!motivoManual.trim()) return alert("Debe ingresar el motivo.");
+      if (!form.peso) return alert("Debe ingresar el peso.");
+    }
+
     try {
-      await api.post("/api/pesadas", {
+      await api.post("/pesadas", {
         tipo_movimiento: form.tipo_movimiento,
         empresa_id: Number(form.empresa_id),
-        chofer_id: Number(form.chofer_id),
+        personal_id: Number(form.personal_id),
         material_id: Number(form.material_id),
-        tipo_vehiculo_id: Number(form.tipo_vehiculo_id),
         vehiculo_id: Number(form.vehiculo_id),
-        caja_id:
-          Number(form.tipo_vehiculo_id) === ROLL_OFF_ID
-            ? Number(form.caja_id)
-            : null,
+        caja_id: form.caja_id ? Number(form.caja_id) : null,
         modo: form.origen === "BALANZA" ? "AUTOMATICO" : "MANUAL",
-        peso_manual:
-          form.origen === "MANUAL" ? Number(form.peso) : null,
+        peso_manual: form.origen === "MANUAL" ? Number(form.peso) : null,
+        password_manual: form.origen === "MANUAL" ? passwordManual : null,
+        motivo_manual: form.origen === "MANUAL" ? motivoManual : null,
       });
 
       onCreated?.();
 
-      setForm(f => ({
-        ...f,
+      setForm({
+        tipo_movimiento: "INGRESO",
+        origen: "BALANZA",
         empresa_id: "",
-        chofer_id: "",
+        personal_id: "",
         material_id: "",
         tipo_vehiculo_id: "",
         vehiculo_id: "",
         caja_id: "",
         peso: "",
-      }));
+      });
+      setPasswordManual("");
+      setMotivoManual("");
+      alert("Pesada guardada correctamente.");
 
     } catch (err) {
-      alert(err.response?.data?.error || "Error al guardar la pesada");
+      alert(err.response?.data?.error || "Error al guardar la pesada.");
     }
   };
-  /* ================= OPTIONS ================= */
 
-  const empresaOptions = empresas.map(e => ({
-    value: e.id,
-    label: e.nombre,
-  }));
-
-  const choferOptions = choferes.map(c => ({
+  const empresaOptions = empresas.map(e => ({ value: e.id, label: e.nombre }));
+  const personalOptions = personal.map(c => ({
     value: c.id,
     label: `${c.nombre} ${c.apellido}`,
   }));
-
-  const materialOptions = materiales.map(m => ({
-    value: m.id,
-    label: m.nombre,
-  }));
-
-  const tipoVehiculoOptions = tiposVehiculo.map(t => ({
-    value: t.id,
-    label: t.nombre,
-  }));
-
-  const vehiculoOptions = vehiculos.map(v => ({
-    value: v.id,
-    label: v.patente,
-  }));
+  const materialOptions = materiales.map(m => ({ value: m.id, label: m.nombre }));
+  const tipoVehiculoOptions = tiposVehiculo.map(t => ({ value: t.id, label: t.nombre }));
+  const vehiculoOptions = vehiculos.map(v => ({ value: v.id, label: v.patente }));
 
   const cajaOptions = cajas.map(c => ({
     value: c.id,
     label: c.codigo,
   }));
 
-
-  /* ================= RENDER ================= */
   return (
     <form onSubmit={submit}>
 
-      {/* ===== CONTROLES ===== */}
-      <div className="form-card">
-        <div className="form-grid">
+      <div className="section-card">
+        <div className="section-header">
+          <div className="section-icon icon-blue">⚖️</div>
+          <div></div>
+        </div>
 
-          <select
-            name="tipo_movimiento"
-            value={form.tipo_movimiento}
-            onChange={handleChange}
-          >
-            <option value="INGRESO">Ingreso</option>
-            <option value="EGRESO">Egreso</option>
-          </select>
+        <div className="field-grid-horizontal">
 
-          <select value={form.origen} onChange={handleOrigenChange}>
-            <option value="BALANZA">Balanza</option>
-            <option value="MANUAL">Manual</option>
-          </select>
+          {/* Movimiento */}
+          <div className="field-group">
+            <label>Movimiento</label>
+            <div className="toggle-group">
+              <button
+                type="button"
+                className={`toggle-btn ${form.tipo_movimiento === "INGRESO" ? "active" : ""}`}
+                onClick={() => setForm(f => ({ ...f, tipo_movimiento: "INGRESO" }))}
+              >
+                Ingreso
+              </button>
+              <button
+                type="button"
+                className={`toggle-btn ${form.tipo_movimiento === "EGRESO" ? "active" : ""}`}
+                onClick={() => setForm(f => ({ ...f, tipo_movimiento: "EGRESO" }))}
+              >
+                Egreso
+              </button>
+            </div>
+          </div>
 
+          {/* Origen del peso */}
+          <div className="field-group">
+            <label>Origen del peso</label>
+            <div className="toggle-group">
+              <button
+                type="button"
+                className={`toggle-btn ${form.origen === "BALANZA" ? "active" : ""}`}
+                onClick={() => handleOrigenChange("BALANZA")}
+              >
+                Balanza
+              </button>
+              <button
+                type="button"
+                className={`toggle-btn ${form.origen === "MANUAL" ? "active" : ""}`}
+                onClick={() => handleOrigenChange("MANUAL")}
+              >
+                Manual
+              </button>
+            </div>
+          </div>
+
+          {/* Peso balanza */}
           {form.origen === "BALANZA" && (
-            <div>
-              <label>Peso balanza</label>
-              <input
-                disabled
-                value={
-                  balanzaOk && pesoBalanza != null
+            <div className="field-group">
+              <label>Peso leído</label>
+              <div className="peso-display">
+                <div className={`peso-dot ${!balanzaOk ? "off" : ""}`} />
+                <span className="peso-value">
+                  {balanzaOk && pesoBalanza != null
                     ? `${Number(pesoBalanza).toLocaleString("es-AR")} kg`
-                    : "Balanza no disponible"
-                }
-              />
+                    : "Sin conexión"}
+                </span>
+              </div>
             </div>
           )}
 
+          {/* Peso manual */}
           {form.origen === "MANUAL" && (
-            <div>
-              <label>Peso manual</label>
-              <input
-                type="number"
-                name="peso"
-                value={form.peso}
-                onChange={(e) => {
-                  const value = e.target.value;
+            <>
+              <div className="field-group">
+                <label>Contraseña de autorización</label>
+                <input
+                  type="password"
+                  value={passwordManual}
+                  onChange={e => setPasswordManual(e.target.value)}
+                  placeholder="Ingresá la contraseña"
+                />
+              </div>
 
-                  // Permitir borrar el campo
-                  if (value === "") {
-                    setForm(f => ({ ...f, peso: "" }));
-                    return;
-                  }
+              <div className="field-group">
+                <label>Peso total (kg)</label>
+                <input
+                  type="number"
+                  value={form.peso}
+                  min="0"
+                  step="1"
+                  placeholder="Ej: 12500"
+                  onChange={e => setForm(f => ({ ...f, peso: e.target.value }))}
+                />
+              </div>
 
-                  const numero = Number(value);
+              <div className="manual-note">
+                ⚠ La carga manual requiere contraseña de autorización y motivo escrito.
+              </div>
 
-                  // No permitir negativos
-                  if (numero < 0) return;
-
-                  setForm(f => ({ ...f, peso: value }));
-                }}
-                required
-                min="0"
-                step="1"
-              />
-            </div>
+              <div className="field-group">
+                <label>Motivo</label>
+                <textarea
+                  value={motivoManual}
+                  onChange={e => setMotivoManual(e.target.value)}
+                  placeholder="Describí el motivo de la carga manual..."
+                />
+              </div>
+            </>
           )}
         </div>
       </div>
 
-      {/* ===== DATOS ===== */}
-      <div className="form-card">
-        <div className="form-grid">
+      {/* ===== DATOS DEL VIAJE ===== */}
+      <div className="section-card">
+        <div className="section-header">
+          <div className="section-icon icon-teal">👤</div>
+          <div>
+            <div className="section-title">Datos del viaje</div>
+            <div className="section-subtitle">Empresa, chofer y material transportado</div>
+          </div>
+        </div>
 
-          {/* EMPRESA */}
-          <div className="select-add">
-            <div style={{ flex: 1 }}>
+        <div className="field-grid-horizontal">
+
+          {/* Empresa */}
+          <div className="field-group">
+            <label>Empresa</label>
+            <div className="select-with-btn">
               <Select
-                placeholder="Buscar empresa..."
-                options={empresas.map(e => ({
-                  value: e.id,
-                  label: e.nombre,
-                }))}
-                value={
-                  empresas
-                    .map(e => ({ value: e.id, label: e.nombre }))
-                    .find(option => option.value === Number(form.empresa_id)) || null
-                }
-                onChange={(selected) =>
-                  setForm(f => ({
-                    ...f,
-                    empresa_id: selected ? selected.value : "",
-                  }))
-                }
+                options={empresaOptions}
+                value={empresaOptions.find(o => o.value === Number(form.empresa_id)) || null}
+                onChange={s => setForm(f => ({ ...f, empresa_id: s?.value || "" }))}
                 isClearable
+                placeholder="Seleccionar..."
               />
+              <button type="button" className="btn-add" onClick={() => setShowEmpresa(true)}>+</button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setShowEmpresa(true)}
-            >
-              ➕
-            </button>
           </div>
 
-          {/* CHOFER */}
-          <div className="select-add">
-            <div style={{ flex: 1 }}>
+          {/* Personal/Chofer */}
+          <div className="field-group">
+            <label>Chofer</label>
+            <div className="select-with-btn">
               <Select
-                placeholder="Chofer"
-                options={choferOptions}
-                value={choferOptions.find(o => o.value === Number(form.chofer_id)) || null}
-                onChange={(selected) =>
-                  setForm(f => ({
-                    ...f,
-                    chofer_id: selected ? selected.value : "",
-                  }))
-                }
+                options={personalOptions}
+                value={personalOptions.find(o => o.value === Number(form.personal_id)) || null}
+                onChange={s => setForm(f => ({ ...f, personal_id: s?.value || "" }))}
                 isClearable
+                placeholder="Seleccionar..."
               />
+              <button type="button" className="btn-add" onClick={() => setShowChofer(true)}>+</button>
             </div>
-
-            <button type="button" onClick={() => setShowChofer(true)}>
-              ➕
-            </button>
           </div>
 
-
-          {/* MATERIAL */}
-          <div className="select-add">
-            <div style={{ flex: 1 }}>
+          {/* Material */}
+          <div className="field-group">
+            <label>Material</label>
+            <div className="select-with-btn">
               <Select
-                placeholder="Material"
                 options={materialOptions}
                 value={materialOptions.find(o => o.value === Number(form.material_id)) || null}
-                onChange={(selected) =>
-                  setForm(f => ({
-                    ...f,
-                    material_id: selected ? selected.value : "",
-                  }))
-                }
+                onChange={s => setForm(f => ({ ...f, material_id: s?.value || "" }))}
                 isClearable
+                placeholder="Seleccionar..."
               />
+              <button type="button" className="btn-add" onClick={() => setShowMaterial(true)}>+</button>
             </div>
-
-            <button type="button" onClick={() => setShowMaterial(true)}>
-              ➕
-            </button>
           </div>
 
+        </div>
+      </div>
 
-          {/* TIPO VEHÍCULO */}
-          <Select
-            placeholder="Tipo de vehículo"
-            options={tipoVehiculoOptions}
-            value={tipoVehiculoOptions.find(o => o.value === Number(form.tipo_vehiculo_id)) || null}
-            onChange={(selected) =>
-              setForm(f => ({
-                ...f,
-                tipo_vehiculo_id: selected ? selected.value : "",
-                vehiculo_id: "",
-                caja_id: "",
-              }))
-            }
-            isClearable
-          />
+      {/* ===== VEHÍCULO ===== */}
+      <div className="section-card">
+        <div className="section-header">
+          <div className="section-icon icon-amber">🚛</div>
+          <div>
+            <div className="section-title">Vehículo</div>
+            <div className="section-subtitle">Tipo, patente y caja</div>
+          </div>
+        </div>
 
+        <div className="field-grid-horizontal">
 
-          {/* VEHÍCULO */}
-          <div className="select-add">
-            <div style={{ flex: 1 }}>
+          {/* Tipo de vehículo */}
+          <div className="field-group">
+            <label>Tipo de vehículo</label>
+            <Select
+              options={tipoVehiculoOptions}
+              value={tipoVehiculoOptions.find(o => o.value === Number(form.tipo_vehiculo_id)) || null}
+              onChange={handleTipoVehiculo}
+              isClearable
+              placeholder="Seleccionar..."
+            />
+          </div>
+
+          {/* Patente */}
+          <div className="field-group">
+            <label>Patente</label>
+            <div className="select-with-btn">
               <Select
-                placeholder="Patente"
                 options={vehiculoOptions}
                 value={vehiculoOptions.find(o => o.value === Number(form.vehiculo_id)) || null}
-                onChange={(selected) =>
-                  setForm(f => ({
-                    ...f,
-                    vehiculo_id: selected ? selected.value : "",
-                  }))
-                }
-                isClearable
+                onChange={s => setForm(f => ({ ...f, vehiculo_id: s?.value || "" }))}
                 isDisabled={!form.tipo_vehiculo_id}
+                isClearable
+                placeholder={form.tipo_vehiculo_id ? "Seleccionar..." : "Elegí un tipo primero"}
               />
+              <button
+                type="button"
+                className="btn-add"
+                disabled={!form.tipo_vehiculo_id}
+                onClick={() => setShowVehiculo(true)}
+              >
+                +
+              </button>
             </div>
-
-            <button
-              type="button"
-              disabled={!form.tipo_vehiculo_id}
-              onClick={() => setShowVehiculo(true)}
-            >
-              ➕
-            </button>
           </div>
 
+          {/* Tipo de caja → solo Roll Off o Semi y si hay patente */}
+          {["ROLL OFF", "CAMIÓN SEMIRREMOLQUE"].includes(tipoVehiculoSeleccionado?.nombre) && form.vehiculo_id && (
+            <div className="field-group">
+              <label>Tipo de caja</label>
+              <Select
+                options={tiposCaja.map(t => ({ value: t.id, label: t.nombre }))}
+                value={tipoCajaSeleccionado ? { value: tipoCajaSeleccionado.id, label: tipoCajaSeleccionado.nombre } : null}
+                onChange={s => {
+                  const seleccionado = tiposCaja.find(t => t.id === s?.value);
+                  setTipoCajaSeleccionado(seleccionado || null);
+                  setForm(f => ({ ...f, caja_id: "" }));
+                }}
+                isClearable
+                placeholder="Seleccionar tipo de caja..."
+              />
+            </div>
+          )}
 
-          {/* CAJA */}
-          {Number(form.tipo_vehiculo_id) === ROLL_OFF_ID && (
-            <Select
-              placeholder="Caja"
-              options={cajaOptions}
-              value={cajaOptions.find(o => o.value === Number(form.caja_id)) || null}
-              onChange={(selected) =>
-                setForm(f => ({
-                  ...f,
-                  caja_id: selected ? selected.value : "",
-                }))
-              }
-              isClearable
-            />
+          {/* Caja / Semi → solo si se seleccionó tipo de caja */}
+          {tipoCajaSeleccionado && (
+            <div className="field-group">
+              <label>Caja / Semi</label>
+              <div className="select-with-btn">
+                <Select
+                  options={cajaOptions}
+                  value={cajaOptions.find(o => o.value === Number(form.caja_id)) || null}
+                  onChange={s => setForm(f => ({ ...f, caja_id: s?.value || "" }))}
+                  isClearable
+                  placeholder="Seleccionar caja..."
+                />
+                <button type="button" className="btn-add" onClick={() => setShowCaja(true)}>+</button>
+              </div>
+            </div>
           )}
 
         </div>
       </div>
 
-      <div style={{ textAlign: "right" }}>
-        <button className="btn-verde">💾 Guardar pesada</button>
+      {/* ===== FOOTER ===== */}
+      <div className="footer-row">
+        <button type="button" className="btn-secondary">Cancelar</button>
+        <button type="submit" className="btn-primary">💾 Guardar pesada</button>
       </div>
 
       {/* ===== MODALES ===== */}
@@ -425,8 +476,8 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
         <ChoferModal
           onClose={() => setShowChofer(false)}
           onSaved={c => {
-            setChoferes(p => [...p, c]);
-            setForm(f => ({ ...f, chofer_id: c.id }));
+            setPersonal(p => [...p, c]);
+            setForm(f => ({ ...f, personal_id: c.id }));
           }}
         />
       )}
@@ -451,6 +502,17 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
           }}
         />
       )}
+
+      {showCaja && (
+        <CajaModal
+          onClose={() => setShowCaja(false)}
+          onSaved={c => {
+            setCajas(p => [...p, c]);
+            setForm(f => ({ ...f, caja_id: c.id }));
+          }}
+        />
+      )}
+
     </form>
   );
 }

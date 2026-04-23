@@ -8,7 +8,6 @@ function Modal({ title, children, onClose }) {
         {children}
 
         <div style={{ marginTop: 16, textAlign: "right" }}>
-          <button onClick={onClose}>Cerrar</button>
         </div>
       </div>
     </div>

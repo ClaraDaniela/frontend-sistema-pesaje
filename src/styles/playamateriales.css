@@ -1,0 +1,222 @@
+/* ===============================
+   CONTENEDOR PRINCIPAL
+=============================== */
+.descarga-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.descarga-container h2 {
+    margin-bottom: 18px;
+    color: var(--azul-corp);
+}
+
+/* ===============================
+   SELECTOR
+=============================== */
+.selector {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.selector label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gris-texto);
+}
+
+.selector select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--gris-borde);
+    font-size: 13px;
+    outline: none;
+    transition: border 0.15s;
+    height: 40px;
+    line-height: 1.4;
+}
+
+.selector select:focus {
+    border-color: var(--azul-corp);
+}
+
+/* ===============================
+   INFO DE PESADA
+=============================== */
+.info {
+    background: var(--azul-soft);
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.info p {
+    font-size: 13px;
+}
+
+/* ===============================
+   FILAS DE MATERIALES
+=============================== */
+.fila {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.fila select,
+.fila input {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--gris-borde);
+    font-size: 13px;
+    outline: none;
+    transition: border 0.15s;
+}
+
+.fila select:focus,
+.fila input:focus {
+    border-color: var(--azul-corp);
+}
+
+.fila-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+
+.fila-header span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--azul-corp);
+}
+
+/* INPUT KG DESHABILITADO */
+.fila input[disabled] {
+    background: #f3f4f6;
+    color: #777;
+    cursor: not-allowed;
+}
+
+/* BOTÓN ELIMINAR */
+.fila button {
+    padding: 7px 10px;
+    border-radius: 7px;
+    border: none;
+    background: #e54848;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.fila button:hover {
+    background: #c73737;
+}
+
+/* ===============================
+   BOTÓN AGREGAR
+=============================== */
+.btn-add {
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px dashed var(--azul-corp);
+    background: transparent;
+    color: var(--azul-corp);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-add:hover {
+    background: var(--azul-soft);
+}
+
+.fila-add {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.fila-add .btn-add {
+    grid-column: 1 / 2;
+    width: 40%;
+    text-align: left;
+}
+
+/* ===============================
+   TOTAL %
+=============================== */
+.descarga-container p {
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+/* ===============================
+   TEXTAREA
+=============================== */
+textarea {
+    width: 100%;
+    min-height: 90px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--gris-borde);
+    font-size: 13px;
+    resize: vertical;
+    outline: none;
+    transition: border 0.15s;
+}
+
+textarea:focus {
+    border-color: var(--azul-corp);
+}
+
+/* ===============================
+   BOTÓN GUARDAR
+=============================== */
+.btn-save {
+    margin-top: 14px;
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: none;
+    background: var(--verde-corp);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-save:hover {
+    background: #235a40;
+}
+
+/* ===============================
+   RESPONSIVE
+=============================== */
+@media (max-width: 600px) {
+    .fila {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-save {
+        font-size: 13px;
+    }
+}

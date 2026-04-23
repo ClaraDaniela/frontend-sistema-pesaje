@@ -20,48 +20,67 @@ export default function EditPesadaModal({ pesada, empresas, choferes, materiales
     origen: "BALANZA",
   });
 
-  /* ================= CARGA INICIAL ================= */
   useEffect(() => {
-    api.get("/api/tipos_vehiculo")
+    api.get("/tipos_vehiculo")
       .then(res => setTiposVehiculo(res.data))
       .catch(console.error);
   }, []);
 
-  /* ================= CARGAR PESADA ================= */
   useEffect(() => {
     if (!pesada) return;
 
-    setForm({
+    setForm(prev => ({
+      ...prev,
       tipo_movimiento: pesada.tipo_movimiento || "INGRESO",
       empresa_id: pesada.empresa_id || "",
       chofer_id: pesada.chofer_id || "",
       material_id: pesada.material_id || "",
       tipo_vehiculo_id: pesada.tipo_vehiculo_id || "",
-      vehiculo_id: pesada.vehiculo_id || "",
-      caja_id: pesada.caja_id || "",
       peso: pesada.peso_bruto_kg || "",
       origen: pesada.origen || "BALANZA",
-    });
+    }));
   }, [pesada]);
 
-  /* ================= VEHÍCULOS + CAJAS ================= */
   useEffect(() => {
     if (!form.tipo_vehiculo_id) return;
 
-    api.get("/api/vehiculos", { params: { tipo_vehiculo_id: form.tipo_vehiculo_id } })
-      .then(res => setVehiculos(res.data))
-      .catch(console.error);
+    const loadData = async () => {
+      try {
+        const vehRes = await api.get("/vehiculos", {
+          params: { tipo_vehiculo_id: form.tipo_vehiculo_id },
+        });
 
-    if (Number(form.tipo_vehiculo_id) === ROLL_OFF_ID) {
-      api.get("/api/cajas")
-        .then(res => setCajas(res.data))
-        .catch(console.error);
-    } else {
-      setCajas([]);
-    }
-  }, [form.tipo_vehiculo_id]);
+        setVehiculos(vehRes.data);
 
-  /* ================= HANDLERS ================= */
+        if (pesada?.vehiculo_id) {
+          setForm(prev => ({
+            ...prev,
+            vehiculo_id: String(pesada.vehiculo_id),
+          }));
+        }
+
+        if (Number(form.tipo_vehiculo_id) === ROLL_OFF_ID) {
+          const cajasRes = await api.get("/cajas");
+          setCajas(cajasRes.data);
+
+          if (pesada?.caja_id) {
+            setForm(prev => ({
+              ...prev,
+              caja_id: String(pesada.caja_id),
+            }));
+          }
+        } else {
+          setCajas([]);
+        }
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadData();
+  }, [form.tipo_vehiculo_id, pesada]);
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -70,16 +89,21 @@ export default function EditPesadaModal({ pesada, empresas, choferes, materiales
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/api/pesadas/${pesada.id}`, {
+      const payload = {
         tipo_movimiento: form.tipo_movimiento,
         empresa_id: Number(form.empresa_id),
         chofer_id: Number(form.chofer_id),
         material_id: Number(form.material_id),
         vehiculo_id: Number(form.vehiculo_id),
-        caja_id: Number(form.caja_id) || null,
-        peso_manual: form.origen === "MANUAL" ? Number(form.peso) : null,
-        modo: form.origen === "BALANZA" ? "AUTOMATICO" : "MANUAL",
-      });
+        caja_id: form.caja_id ? Number(form.caja_id) : null,
+      };
+
+      // ✅ SOLO agregar peso si corresponde
+      if (form.origen === "MANUAL") {
+        payload.peso_manual = Number(form.peso);
+      }
+
+      await api.put(`/pesadas/${pesada.id}`, payload);
 
       onSaved?.();
       onClose?.();
@@ -91,8 +115,8 @@ export default function EditPesadaModal({ pesada, empresas, choferes, materiales
 
   if (!pesada) return null;
 
-  const editable = form.origen === "MANUAL";
-
+  const puedeEditarPeso = form.origen === "MANUAL";
+  console.log("cajas:", cajas, "caja_id en form:", form.caja_id);
   return (
     <div className="modal-overlay">
       <div className="modal">
@@ -120,19 +144,17 @@ export default function EditPesadaModal({ pesada, empresas, choferes, materiales
           {/* Empresa, Chofer, Material */}
           <select name="empresa_id" value={form.empresa_id} onChange={handleChange} required>
             <option value="">Empresa</option>
-            {empresas.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+            {empresas.map(e => <option key={e.id} value={String(e.id)}>{e.nombre}</option>)}
           </select>
 
           <select name="chofer_id" value={form.chofer_id} onChange={handleChange} required>
             <option value="">Chofer</option>
-            {choferes.map(c => (
-              <option key={c.id} value={c.id}>{c.nombre} {c.apellido}</option>
-            ))}
+            {choferes.map(c => <option key={c.id} value={String(c.id)}>{c.nombre} {c.apellido}</option>)}
           </select>
 
           <select name="material_id" value={form.material_id} onChange={handleChange} required>
             <option value="">Material</option>
-            {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+            {materiales.map(m => <option key={m.id} value={String(m.id)}>{m.nombre}</option>)}
           </select>
 
           {/* Tipo de vehículo, Vehículo y Caja */}
@@ -140,22 +162,20 @@ export default function EditPesadaModal({ pesada, empresas, choferes, materiales
             name="tipo_vehiculo_id"
             value={form.tipo_vehiculo_id}
             onChange={handleChange}
-            disabled={!editable}
             required
           >
             <option value="">Tipo de vehículo</option>
-            {tiposVehiculo.map(tv => <option key={tv.id} value={tv.id}>{tv.nombre}</option>)}
+            {tiposVehiculo.map(tv => <option key={tv.id} value={String(tv.id)}>{tv.nombre}</option>)}
           </select>
 
           <select
             name="vehiculo_id"
             value={form.vehiculo_id}
             onChange={handleChange}
-            disabled={!editable}
             required
           >
             <option value="">Vehículo</option>
-            {vehiculos.map(v => <option key={v.id} value={v.id}>{v.patente}</option>)}
+            {vehiculos.map(v => <option key={v.id} value={String(v.id)}>{v.patente}</option>)}
           </select>
 
           {Number(form.tipo_vehiculo_id) === ROLL_OFF_ID && (
@@ -163,10 +183,9 @@ export default function EditPesadaModal({ pesada, empresas, choferes, materiales
               name="caja_id"
               value={form.caja_id || ""}
               onChange={handleChange}
-              disabled={!editable}
             >
               <option value="">Caja</option>
-              {cajas.map(c => <option key={c.id} value={c.id}>{c.codigo}</option>)}
+              {cajas.map(c => <option key={c.id} value={String(c.id)}>{c.codigo}</option>)})
             </select>
           )}
 
@@ -176,9 +195,14 @@ export default function EditPesadaModal({ pesada, empresas, choferes, materiales
             name="peso"
             value={form.peso}
             onChange={handleChange}
-            disabled={!editable}
+            disabled={!puedeEditarPeso}
             placeholder="Peso"
           />
+          {!puedeEditarPeso && (
+            <small style={{ color: "gray" }}>
+              El peso no se puede modificar porque proviene de la balanza
+            </small>
+          )}
 
           {/* Botones */}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>

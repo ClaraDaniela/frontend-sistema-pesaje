@@ -10,7 +10,7 @@ function VehiculoModal({ tipoVehiculoId, onClose, onSaved }) {
   const guardar = async () => {
     if (!patente || !tara) return;
 
-    const res = await api.post("/api/vehiculos", {
+    const res = await api.post("/vehiculos", {
       patente,
       descripcion,
       tara_kg: tara,
@@ -42,7 +42,23 @@ function VehiculoModal({ tipoVehiculoId, onClose, onSaved }) {
         onChange={e => setTara(e.target.value)}
       />
 
-      <button onClick={guardar}>Guardar</button>
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={onClose}
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          className="btn-primary"
+          onClick={guardar}
+        >
+          Guardar
+        </button>
+      </div>
     </Modal>
   );
 }

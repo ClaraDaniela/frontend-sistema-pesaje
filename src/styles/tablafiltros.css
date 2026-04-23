@@ -1,0 +1,117 @@
+:root {
+  --gris-borde: #D1D5DB;
+  --gris-texto: #333;
+  --azul-corp: #1F3A5F;
+  --azul-soft: #F0F4F8;
+}
+
+/* CONTENEDOR GENERAL */
+.pesadas-table-container {
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ===== FILTROS ===== */
+.pesadas-filtros-card {
+  background: white;
+  border: 1px solid var(--gris-borde);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.pesadas-filtros-card .section-header {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+.pesadas-filtros-card .section-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pesadas-filtros-card .section-subtitle {
+  font-size: 11px;
+  color: #666;
+}
+
+.pesadas-filtros-card .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 6px;
+}
+
+.pesadas-filtros-card .field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pesadas-filtros-card label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+}
+
+.pesadas-filtros-card input,
+.pesadas-filtros-card select {
+  height: 32px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--gris-borde);
+  font-size: 13px;
+}
+
+.pesadas-filtros-card .footer-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.pesadas-filtros-card .btn-primary,
+.pesadas-filtros-card .btn-secondary {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+/* ===== TABLA ===== */
+.pesadas-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+}
+
+.pesadas-table th {
+  background: var(--azul-corp);
+  color: white;
+  padding: 8px;
+  font-size: 12px;
+  text-align: left;
+}
+
+.pesadas-table td {
+  padding: 6px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+.pesadas-table tr:hover {
+  background: var(--azul-soft);
+}
+
+.acciones {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.acciones button {
+  flex: 1;
+  min-width: 40px;
+  padding: 3px 4px;
+  font-size: 12px;
+}

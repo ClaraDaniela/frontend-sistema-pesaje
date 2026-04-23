@@ -10,6 +10,12 @@ export default function PesadaDetailModal({ pesada, onClose }) {
         <p><b>Tipo:</b> {pesada.tipo_movimiento}</p>
         <p><b>Origen:</b> {pesada.origen}</p>
 
+        {pesada.origen === "MANUAL" && pesada.motivo_manual &&(
+          <p>
+            <b>Motivo carga manual:</b> {pesada.motivo_manual}
+          </p>
+        )}
+
         <hr />
 
         <p><b>Empresa:</b> {pesada.empresa}</p>

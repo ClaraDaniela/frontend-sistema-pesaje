@@ -1,23 +1,17 @@
-/* ===============================
-   🎨 PALETA SERVIECO PERO EN PASTELES
-   =============================== */
 :root {
-  --verde: #e3f0e8;
-  --verde-light: #E9F7EF;
+  --verde-corp: #2D6A4F;
+  --azul-corp: #1F3A5F;
+  --violeta-corp: #5A189A;
 
-  --azul: #6C9BD2;
-  --azul-light: #EEF4FB;
+  --verde-soft: #F0F7F4;
+  --azul-soft: #F0F4F8;
+  --violeta-soft: #F5F3F7;
 
-  --violeta: #B39DDB;
-  --violeta-light: #f9effb;
+  --gris-texto: #333;
+  --gris-borde: #D1D5DB;
+  --blanco: #fff;
 
-  --gris-texto: #4F4F4F;
-  --gris-borde: #E0E0E0;
-  --blanco: #ffffff;
-
-  --fondo-form: #ffffff; /* fondo claro para formularios */
-  --fondo-tabla: #ffffff; /* fondo tabla */
-  --texto-titulo: #1F3A5F; /* azul oscuro para títulos */
+  --titulo: #1F3A5F;
 }
 
 /* ===============================
@@ -27,112 +21,260 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
 
 body {
-  background-color: var(--verde-light);
+  background: #F8FAFC;
   color: var(--gris-texto);
 }
 
 /* ===============================
-   CONTENEDOR
+   LAYOUT
    =============================== */
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: auto;
   padding: 24px;
 }
 
-h1, h2, h3 {
-  color: var(--texto-titulo);
-  margin-bottom: 16px;
+h1,
+h2,
+h3 {
+  color: var(--titulo);
 }
 
 /* ===============================
-   FORMULARIOS / SECCIONES
+   TOPBAR
    =============================== */
-.form-card {
-  background: var(--fondo-form);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-  margin-bottom: 32px;
-  border: 1px solid var(--gris-borde);
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
 }
 
-.form-card h2 {
+.btn-secundario {
+  border: 1px solid var(--gris-borde);
+  background: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-secundario:hover {
+  background: var(--azul-soft);
+}
+
+/* ===============================
+   TARJETAS
+   =============================== */
+.section-card {
+  background: white;
+  border: 1px solid var(--gris-borde);
+  border-radius: 14px;
+  padding: 20px;
   margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* HEADER DE SECCIÓN */
+.section-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+.section-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-blue {
+  background: #E6F1FB;
+}
+
+.icon-teal {
+  background: #E1F5EE;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.section-subtitle {
+  font-size: 12px;
+  color: #666;
+}
+
+/* ===============================
+   FORMULARIOS
+   =============================== */
+.field-grid-horizontal {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  align-items: end;
+  /* los labels y selects quedan alineados */
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* antes era 4px */
+}
+
+/* labels tipo sistema real */
 label {
-  font-size: 0.85rem;
-  margin-bottom: 4px;
-  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #666;
 }
 
+/* inputs */
 input,
 select {
-  width: 100%;
-  padding: 10px 12px;
+  height: 36px;
+  padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid var(--gris-borde);
-  background: var(--blanco);
-  color: var(--gris-texto);
+  font-size: 14px;
 }
 
-input:disabled {
-  background: #F2F2F2;
-  font-weight: bold;
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--azul-corp);
+  box-shadow: 0 0 0 2px rgba(31, 58, 95, 0.1);
+}
+
+/* ===============================
+   SELECT + BOTÓN
+   =============================== */
+.select-add {
+  display: flex;
+  gap: 6px;
+}
+
+.select-add button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--gris-borde);
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+/* ===============================
+   TOGGLES (Ingreso / Manual)
+   =============================== */
+.toggle-group {
+  display: flex;
+  border: 1px solid var(--gris-borde);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 36px;
+}
+
+.toggle-btn {
+  flex: 1;
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.toggle-btn.active {
+  background: #E6F1FB;
+  color: #185FA5;
+  font-weight: 600;
+}
+
+/* ===============================
+   PESO BALANZA
+   =============================== */
+.peso-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+}
+
+.peso-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.peso-dot.off {
+  background: #ef4444;
+}
+
+.peso-value {
+  font-weight: 600;
+}
+
+/* ===============================
+   ALERTA MANUAL
+   =============================== */
+.manual-note {
+  font-size: 12px;
+  color: #b45309;
+  background: #FFF7ED;
+  padding: 8px;
+  border-radius: 8px;
 }
 
 /* ===============================
    BOTONES
    =============================== */
 button {
-  border: none;
-  padding: 12px 16px;
-  border-radius: 10px;
   cursor: pointer;
+  border: none;
+  border-radius: 8px;
   font-weight: 600;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.btn-block {
+  width: 100%;
 }
 
 .btn-verde {
-  background: var(--verde);
-  color: #1B4332;
+  background: var(--verde-corp);
+  color: white;
+  padding: 10px 20px;
 }
 
-.btn-azul {
-  background: var(--azul);
-  color: #1F3A5F;
-}
-
-.btn-violeta {
-  background: var(--violeta);
-  color: #3C096C;
+.btn-verde:hover {
+  opacity: 0.9;
 }
 
 /* ===============================
    TABLA
    =============================== */
 .table-card {
-  background: var(--fondo-tabla);
+  background: white;
+  border: 1px solid var(--gris-borde);
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-  border: 1px solid var(--gris-borde);
+  overflow-x: auto;
 }
 
 table {
@@ -141,10 +283,10 @@ table {
 }
 
 th {
-  text-align: left;
+  background: var(--azul-corp);
+  color: white;
   padding: 12px;
-  background: var(--violeta-light);
-  color: var(--violeta);
+  text-align: left;
 }
 
 td {
@@ -153,7 +295,22 @@ td {
 }
 
 tr:hover {
-  background: var(--verde-light);
+  background: var(--azul-soft);
+}
+
+/* ===============================
+   ACCIONES TABLA
+   =============================== */
+.acciones {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.acciones button {
+  flex: 1;
+  min-width: 60px;
+  padding: 6px;
 }
 
 /* ===============================
@@ -162,155 +319,176 @@ tr:hover {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  width: 350px;
+  text-align: center;
+}
+
+.modal-box.success {
+  border-top: 6px solid #22c55e;
+}
+
+.modal-box.error {
+  border-top: 6px solid #ef4444;
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 768px) {
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  h2 {
+    font-size: 16px;
+  }
+}
+
+.footer-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* botones */
+.btn-primary {
+  background: var(--azul-corp);
+  color: white;
+  padding: 10px 18px;
+}
+
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--gris-borde);
+  padding: 10px 18px;
+}
+
+.btn-secondary:hover {
+  background: var(--azul-soft);
+}
+
+.select-with-btn {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.select-with-btn>div {
+  flex: 1;
+}
+
+.btn-add {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+}
+
+/* ===============================
+   MODAL FIX PRO
+   =============================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0, 0, 0, 0.55);
+
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-}
 
-.modal {
-  background: var(--blanco);
+  z-index: 99999;
+}
+.modal,
+.modal-box {
+  background: #ffffff;
   border-radius: 14px;
   padding: 24px;
   width: 100%;
   max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0,0,0,.3);
+
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+
+  position: relative;
+  z-index: 100000;
 }
 
-.modal h3 {
-  color: var(--violeta);
-  margin-bottom: 16px;
+.modal,
+.modal-box {
+  animation: modalFade 0.2s ease;
 }
 
-/* ===============================
-   BADGES
-   =============================== */
-.badge {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: bold;
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.badge-ingreso {
-  background: var(--verde-light);
-  color: var(--verde);
+.layout,
+.content {
+  z-index: auto;
 }
 
-.badge-egreso {
-  background: var(--violeta-light);
-  color: var(--violeta);
-}
-
-.select-add {
+.modal-footer {
   display: flex;
-  gap: 6px;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-.select-add button {
-  padding: 0 10px;
-  font-size: 18px;
+.btn-primary {
+  background: var(--azul-corp);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-/* ===============================
-   styles para tabla de pesadas
-   =============================== */
-
-@media (max-width: 768px) {
-  .pesadas-table,
-  .pesadas-table thead,
-  .pesadas-table tbody,
-  .pesadas-table th,
-  .pesadas-table td,
-  .pesadas-table tr {
-    display: block;
-    width: 100%;
-  }
-
-  .pesadas-table thead {
-    display: none;
-  }
-
-  .pesadas-table tr {
-    background: var(--fondo-form);
-    margin-bottom: 16px;
-    border-radius: 12px;
-    padding: 12px;
-    border: 1px solid var(--gris-borde);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  }
-
-  .pesadas-table td {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    border: none;
-  }
-
-  .pesadas-table td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: var(--texto-titulo);
-  }
-
-  .pesadas-table td:last-child {
-    margin-top: 10px;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-
-  .pesadas-table td:last-child button {
-    width: 100%;
-  }
+.btn-primary:hover {
+  filter: brightness(1.05);
 }
 
-/* ===============================
-   styles para logo
-   =============================== */
-.logo-container {
-  width: 250px;      /* alto deseado */
-  overflow: hidden;  /* recorta bordes extras */
-  margin: 0 auto;
-}
-
-.logo-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* mantiene proporción, pero llena el contenedor */
-  display: block;
-}
-
-/* DATE */
-
-.floating-field {
-  position: relative;
-}
-
-.floating-field label {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.85rem;
-  color: #888;
+.btn-secondary {
   background: white;
-  padding: 0 4px;
-  pointer-events: none;
-  transition: 0.2s;
+  border: 1px solid var(--gris-borde);
+  color: var(--gris-texto);
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.floating-field input {
-  padding: 14px 12px 10px;
-}
-
-.floating-field input:focus + label,
-.floating-field input:not(:placeholder-shown) + label {
-  top: -6px;
-  font-size: 0.7rem;
-  color: var(--azul);
+.btn-secondary:hover {
+  background: var(--azul-soft);
 }
 

@@ -8,7 +8,7 @@ function EmpresaModal({ onClose, onSaved }) {
   const guardar = async () => {
     if (!nombre.trim()) return;
 
-    const res = await api.post("/api/empresas", { nombre });
+    const res = await api.post("/empresas", { nombre });
     onSaved(res.data);
     onClose();
   };
@@ -20,7 +20,23 @@ function EmpresaModal({ onClose, onSaved }) {
         onChange={e => setNombre(e.target.value)}
         placeholder="Nombre de la empresa"
       />
-      <button onClick={guardar}>Guardar</button>
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={onClose}
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={guardar}
+        >
+          Guardar
+        </button>
+      </div>
     </Modal>
   );
 }

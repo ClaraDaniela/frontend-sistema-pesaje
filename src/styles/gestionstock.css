@@ -1,0 +1,345 @@
+/* ===============================
+   PALETA DE COLORES
+   =============================== */
+:root {
+  --azul-corp: #1F3A5F;
+  --azul-medio: #2A4F7F;
+  --azul-sidebar: #1F3A5F; 
+  --azul-soft: #F0F4F8;
+  --gris-texto: #333;
+  --gris-borde: #D1D5DB;
+  --blanco: #fff;
+  --verde-corp: #2D6A4F;
+  --verde-accent: #5DCAA5;
+}
+
+/* ===============================
+   RESET BÁSICO
+   =============================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background: #F0F4F8;
+  color: var(--gris-texto);
+}
+
+/* ===============================
+   LAYOUT PRINCIPAL
+   =============================== */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ===============================
+   SIDEBAR
+   =============================== */
+.sidebar {
+  width: 230px;
+  background: var(--azul-sidebar);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+/* Separador debajo del logo */
+.sidebar > *:first-child {
+  padding-bottom: 16px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 8px;
+}
+
+.sidebar button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  width: 100%;
+  text-align: left;
+  line-height: 1.3;
+}
+
+.sidebar button:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar button.active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+/* Ícono dentro del botón */
+.sidebar button .nav-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar button.active .nav-icon {
+  background: #fff;
+}
+
+/* Punto indicador en botón activo */
+.sidebar button.active::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--verde-accent);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ===============================
+   CONTENIDO PRINCIPAL
+   =============================== */
+.content {
+  flex: 1;
+  padding: 28px;
+  overflow-x: auto;
+  background: #F0F4F8;
+}
+
+.content h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--azul-corp);
+}
+
+.content h2 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--azul-corp);
+}
+
+/* ===============================
+   TARJETAS
+   =============================== */
+.table-card {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 12px;
+  }
+
+  .sidebar > *:first-child {
+    border-bottom: none;
+    border-right: 0.5px solid rgba(59, 125, 201, 0.12);
+    padding-bottom: 0;
+    padding-right: 12px;
+    margin-bottom: 0;
+    margin-right: 4px;
+  }
+
+  .sidebar nav {
+    flex-direction: row;
+    margin-top: 0;
+  }
+
+  .sidebar button {
+    flex: 1;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
+  .sidebar button.active::after {
+    display: none;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}
+
+/* ===============================
+   BOTONES GENERALES
+   =============================== */
+.btn-verde {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--verde-corp);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-verde:hover {
+  background: #235a40;
+}
+
+.btn-ajuste {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--gris-borde);
+  background: var(--blanco);
+  color: var(--azul-corp);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  margin-bottom: 12px;
+}
+
+.btn-ajuste:hover {
+  background: var(--azul-soft);
+  border-color: var(--azul-corp);
+}
+
+/* ===============================
+   TABLA
+   =============================== */
+.pesadas-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.pesadas-table thead tr {
+  background: var(--azul-soft);
+}
+
+.pesadas-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--blanco);
+  border-bottom: 1.5px solid var(--gris-borde);
+}
+
+.pesadas-table td {
+  padding: 10px 14px;
+  border-bottom: 0.5px solid var(--gris-borde);
+  color: var(--gris-texto);
+}
+
+.pesadas-table tbody tr:hover {
+  background: #f7fafd;
+}
+
+.pesadas-table input[type="number"] {
+  width: 90px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--gris-borde);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.pesadas-table input[type="number"]:focus {
+  border-color: var(--azul-corp);
+}
+
+/* Botón guardar dentro de la tabla */
+.pesadas-table button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: var(--azul-corp);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pesadas-table button:hover {
+  background: var(--azul-medio);
+}
+
+/* ===============================
+   CHART CARD
+   =============================== */
+.chart-card {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.chart-card h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--azul-corp);
+  margin-bottom: 0;
+}
+
+.topbar-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+.logo-container {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.logo-container img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}

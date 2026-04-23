@@ -4,11 +4,16 @@ import Modal from "./Modal";
 
 function ChoferModal({ onClose, onSaved }) {
   const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
 
   const guardar = async () => {
-    if (!nombre.trim()) return;
+    if (!nombre.trim() || !apellido.trim()) return;
 
-    const res = await api.post("/api/choferes", { nombre });
+    const res = await api.post("/choferes", {
+      nombre,
+      apellido
+    });
+
     onSaved(res.data);
     onClose();
   };
@@ -18,9 +23,32 @@ function ChoferModal({ onClose, onSaved }) {
       <input
         value={nombre}
         onChange={e => setNombre(e.target.value)}
-        placeholder="Nombre del chofer"
+        placeholder="Nombre"
       />
-      <button onClick={guardar}>Guardar</button>
+
+      <input
+        value={apellido}
+        onChange={e => setApellido(e.target.value)}
+        placeholder="Apellido"
+      />
+
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={onClose}
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={guardar}
+        >
+          Guardar
+        </button>
+      </div>
     </Modal>
   );
 }
