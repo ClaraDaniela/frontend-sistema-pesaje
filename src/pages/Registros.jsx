@@ -8,7 +8,7 @@ import Logo from "../components/Logo";
 
 export default function Porteria() {
   const navigate = useNavigate();
-  // Listas
+
   const [pesadas, setPesadas] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const [personal, setPersonal] = useState([]);
@@ -17,11 +17,9 @@ export default function Porteria() {
   const [tipoVehiculo, setTipoVehiculo] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Modales
   const [pesadaView, setPesadaView] = useState(null);
   const [pesadaEdit, setPesadaEdit] = useState(null);
 
-  // Filtros
   const [filters, setFilters] = useState({
     empresa_id: "",
     vehiculo_id: "",
@@ -30,7 +28,6 @@ export default function Porteria() {
     hasta: "",
   });
 
-  // Cargar pesadas según filtros
   const loadPesadas = async (customFilters = filters) => {
     setLoading(true);
     try {
@@ -45,7 +42,6 @@ export default function Porteria() {
     }
   };
 
-  // Cargar listas iniciales
   const loadAll = async () => {
     try {
       const [e, c, m, v, t] = await Promise.all([

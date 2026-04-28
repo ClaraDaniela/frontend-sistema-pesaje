@@ -8,10 +8,10 @@ export default function PaginaPrincipal({ user }) {
   const rol = user?.rol?.trim();
 
   const permisos = {
-    pesadas: ["ADMIN", "porteria"].includes(rol),
-    reportes: ["ADMIN", "operario"].includes(rol),
-    inventario: ["ADMIN", "operario"].includes(rol),
-    registros: ["ADMIN", "operario"].includes(rol),
+    pesadas: ["ADMIN", "PORTERIA"].includes(rol),
+    reportes: ["ADMIN", "OPERADOR"].includes(rol),
+    inventario: ["ADMIN", "OPERADOR"].includes(rol),
+    registros: ["ADMIN", "OPERADOR"].includes(rol),
   };
 
   const handleLogout = () => {
@@ -39,7 +39,7 @@ export default function PaginaPrincipal({ user }) {
       label: "Módulo de Reciclabilidad",
       to: "/playa",
     },
-        {
+    {
       permiso: permisos.registros,
       icon: <FaFileAlt />,
       label: "Módulo de Registros Históricos de Pesadas",

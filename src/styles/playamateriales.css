@@ -105,14 +105,12 @@
   color: var(--azul-corp);
 }
 
-/* INPUT KG DESHABILITADO */
 .fila input[disabled] {
     background: #f3f4f6;
     color: #777;
     cursor: not-allowed;
 }
 
-/* BOTÓN ELIMINAR */
 .fila button {
     padding: 7px 10px;
     border-radius: 7px;

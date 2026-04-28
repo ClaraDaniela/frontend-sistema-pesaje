@@ -52,7 +52,7 @@ function VehiculoModal({ tipoVehiculoId, onClose, onSaved }) {
         </button>
 
         <button
-          type="submit"
+          type="button"
           className="btn-primary"
           onClick={guardar}
         >

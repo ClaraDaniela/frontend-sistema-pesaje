@@ -65,7 +65,7 @@ function App() {
             <PrivateRoute
               isLogged={isLogged}
               user={user}
-              allowedRoles={["ADMIN", "porteria"]}
+              allowedRoles={["ADMIN", "PORTERIA"]}
             >
               <Porteria />
             </PrivateRoute>
@@ -77,7 +77,7 @@ function App() {
             <PrivateRoute
               isLogged={isLogged}
               user={user}
-              allowedRoles={["ADMIN", "operario"]}
+              allowedRoles={["ADMIN", "OPERADOR"]}
             >
               <Registros />
             </PrivateRoute>
@@ -90,7 +90,7 @@ function App() {
             <PrivateRoute
               isLogged={isLogged}
               user={user}
-              allowedRoles={["ADMIN", "operador"]}
+              allowedRoles={["ADMIN", "OPERADOR"]}
             >
               <GestionStock user={user} />
             </PrivateRoute>
