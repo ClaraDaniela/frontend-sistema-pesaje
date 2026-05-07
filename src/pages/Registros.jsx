@@ -1,3 +1,5 @@
+{/*Aca es el componente donde se pueden ver las pesadas registradas*/}
+
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";

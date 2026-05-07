@@ -3,6 +3,18 @@ export default function ResultadoModal({ resultado, onClose }) {
 
   const esOk = resultado.tipo === "ok";
 
+  const pesadaId =
+    resultado.id ||
+    resultado.pesada_id ||
+    resultado?.pesada?.id ||
+    null;
+
+  const imprimirTicket = () => {
+    if (!pesadaId) return;
+
+    window.open(`/api/export/pesada/${pesadaId}`, "_blank");
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
@@ -19,9 +31,9 @@ export default function ResultadoModal({ resultado, onClose }) {
           boxShadow: esOk
             ? "0 10px 30px rgba(46,125,50,0.4)"
             : "0 10px 30px rgba(211,47,47,0.5)",
-          animation: "pop 0.25s ease"
         }}
       >
+
         <div style={{ fontSize: "42px", marginBottom: "10px" }}>
           {esOk ? "✔" : "❌"}
         </div>
@@ -30,20 +42,47 @@ export default function ResultadoModal({ resultado, onClose }) {
           {esOk ? "Operación exitosa" : "⚠ Fuera de tolerancia"}
         </h2>
 
-        <p style={{ marginBottom: "20px" }}>
+        <p style={{ marginBottom: "10px" }}>
           {resultado.mensaje}
         </p>
+        {pesadaId && (
+          <p style={{ fontSize: "14px", opacity: 0.8 }}>
+            N° de pesada: <b>{pesadaId}</b>
+          </p>
+        )}
+
+        <div style={{ marginTop: "20px" }} />
+
+        <button
+          onClick={imprimirTicket}
+          disabled={!pesadaId}
+          style={{
+            background: pesadaId ? "#fff" : "#ccc",
+            color: "#000",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "6px",
+            cursor: pesadaId ? "pointer" : "not-allowed",
+            fontWeight: "bold",
+            marginBottom: "10px",
+            width: "100%",
+            opacity: pesadaId ? 1 : 0.6,
+          }}
+        >
+          🖨 Imprimir ticket
+        </button>
 
         <button
           onClick={onClose}
           style={{
-            background: "white",
-            color: "black",
-            border: "none",
+            background: "transparent",
+            color: "white",
+            border: "1px solid white",
             padding: "8px 20px",
             borderRadius: "6px",
             cursor: "pointer",
-            fontWeight: "bold"
+            fontWeight: "bold",
+            width: "100%",
           }}
         >
           Cerrar

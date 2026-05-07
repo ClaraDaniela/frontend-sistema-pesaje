@@ -6,14 +6,16 @@ export default function Inventario({ user }) {
   const [inputs, setInputs] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const nombreMaterial = (item) =>
+    `${item.categoria} / ${item.material_base}${item.forma ? " / " + item.forma : ""}`;
+
   const loadInventario = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/inventario");
-      console.log("DATA INVENTARIO:", res.data); 
+      const res = await api.get("/materiales_descarga/inventario");
       setInventario(res.data || []);
     } catch (err) {
-      console.error("Error cargando inventario:", err);
+      console.error(err);
       setInventario([]);
     } finally {
       setLoading(false);
@@ -32,17 +34,16 @@ export default function Inventario({ user }) {
       const cantidad = Number(inputs[materialId]);
 
       if (isNaN(cantidad)) {
-        alert("Ingresá un número válido");
+        alert("Número inválido");
         return;
       }
 
-      await api.post("/inventario", {
+      await api.post("/materiales_descarga/inventario", {
         material_id: materialId,
         cantidad,
-        usuario_id: user?.id
+        usuario_id: user?.id,
       });
 
-      // limpiar input
       setInputs({
         ...inputs,
         [materialId]: "",
@@ -51,10 +52,11 @@ export default function Inventario({ user }) {
       await loadInventario();
       alert("Inventario actualizado");
     } catch (err) {
-      console.error("Error guardando:", err);
+      console.error(err);
       alert("Error al guardar");
     }
   };
+
   const descargarExcel = async () => {
     try {
       const res = await api.get("/export/inventario", {
@@ -70,9 +72,8 @@ export default function Inventario({ user }) {
       document.body.appendChild(link);
       link.click();
       link.remove();
-
     } catch (error) {
-      console.error("Error descargando Excel:", error);
+      console.error(error);
       alert("No se pudo descargar el archivo");
     }
   };
@@ -84,17 +85,13 @@ export default function Inventario({ user }) {
   return (
     <section className="table-card">
       <h2>Inventario físico vs sistema</h2>
-                <button
-            className="btn-verde"
-            onClick={descargarExcel}
-          >
-            📥 Descargar Excel
-          </button>
+
+      <button className="btn-verde" onClick={descargarExcel}>
+        📥 Descargar Excel
+      </button>
 
       {loading ? (
-        <p>Cargando inventario...</p>
-      ) : inventario.length === 0 ? (
-        <p>No hay datos de inventario</p>
+        <p>Cargando...</p>
       ) : (
         <table className="pesadas-table">
           <thead>
@@ -104,7 +101,7 @@ export default function Inventario({ user }) {
               <th>Stock físico</th>
               <th>Diferencia</th>
               <th>Última actualización</th>
-              <th>Acciones</th>
+              <th></th>
             </tr>
           </thead>
 
@@ -119,7 +116,7 @@ export default function Inventario({ user }) {
 
               return (
                 <tr key={item.material_id}>
-                  <td>{item.nombre}</td>
+                  <td>{nombreMaterial(item)}</td>
 
                   <td>{item.stock_sistema ?? 0}</td>
 
@@ -149,9 +146,7 @@ export default function Inventario({ user }) {
 
                   <td>
                     {item.fecha_actualizacion
-                      ? new Date(
-                          item.fecha_actualizacion
-                        ).toLocaleString()
+                      ? new Date(item.fecha_actualizacion).toLocaleString()
                       : "-"}
                   </td>
 

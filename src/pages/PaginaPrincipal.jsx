@@ -1,3 +1,5 @@
+{/*Aca es el componente de la pagina principal, se muestra luego del login, es el menu de seleccion*/}
+
 import { useNavigate } from "react-router-dom";
 import { FaWeightHanging, FaBoxes, FaIndustry, FaSignOutAlt, FaFileAlt } from "react-icons/fa";
 import Logo from "../components/Logo";
@@ -11,7 +13,7 @@ export default function PaginaPrincipal({ user }) {
     pesadas: ["ADMIN", "PORTERIA"].includes(rol),
     reportes: ["ADMIN", "OPERADOR"].includes(rol),
     inventario: ["ADMIN", "OPERADOR"].includes(rol),
-    registros: ["ADMIN", "OPERADOR"].includes(rol),
+    registros: ["ADMIN", "OPERADOR", "PORTERIA"].includes(rol),
   };
 
   const handleLogout = () => {

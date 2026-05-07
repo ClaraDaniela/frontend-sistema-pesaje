@@ -136,8 +136,8 @@ h3 {
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  /* antes era 4px */
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 /* labels tipo sistema real */

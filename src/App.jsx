@@ -77,7 +77,7 @@ function App() {
             <PrivateRoute
               isLogged={isLogged}
               user={user}
-              allowedRoles={["ADMIN", "OPERADOR"]}
+              allowedRoles={["ADMIN", "OPERADOR", "PORTERIA"]}
             >
               <Registros />
             </PrivateRoute>

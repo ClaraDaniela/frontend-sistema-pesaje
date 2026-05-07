@@ -177,24 +177,15 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
 
       const p = detalle.data;
 
-      if (p.peso_declarado_kg != null) {
-        if (p.dentro_tolerancia) {
-          setResultado({
-            tipo: "ok",
-            mensaje: "✔ Pesada guardada correctamente (dentro de tolerancia)"
-          });
-        } else {
-          setResultado({
-            tipo: "warning",
-            mensaje: "Pesada guardada, pero FUERA de tolerancia"
-          });
-        }
-      } else {
-        setResultado({
-          tipo: "ok",
-          mensaje: "Pesada guardada correctamente"
-        });
-      }
+      setResultado({
+        tipo: p.dentro_tolerancia ? "ok" : "warning",
+        mensaje: p.peso_declarado_kg != null
+          ? (p.dentro_tolerancia
+            ? "✔ Pesada guardada correctamente (dentro de tolerancia)"
+            : "Pesada guardada, pero FUERA de tolerancia")
+          : "Pesada guardada correctamente",
+        id: p.id 
+      });
 
       setForm({
         tipo_movimiento: "INGRESO",
@@ -316,7 +307,7 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
                 </div>
 
                 <div className="field-group">
-                  <label>Peso total (kg)</label>
+                  <label>Peso de ingreso (kg)</label>
                   <input
                     type="number"
                     value={form.peso}

@@ -30,7 +30,7 @@ function MaterialModal({ onClose, onSaved }) {
         </button>
 
         <button
-          type="submit"
+          type="button"
           className="btn-primary"
           onClick={guardar}
         >

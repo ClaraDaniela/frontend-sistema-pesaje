@@ -9,9 +9,10 @@ function ChoferModal({ onClose, onSaved }) {
   const guardar = async () => {
     if (!nombre.trim() || !apellido.trim()) return;
 
-    const res = await api.post("/choferes", {
+    const res = await api.post("/personal", {
       nombre,
-      apellido
+      apellido,
+      tipo: "CHOFER"
     });
 
     onSaved(res.data);
@@ -20,17 +21,25 @@ function ChoferModal({ onClose, onSaved }) {
 
   return (
     <Modal title="Nuevo chofer" onClose={onClose}>
-      <input
-        value={nombre}
-        onChange={e => setNombre(e.target.value)}
-        placeholder="Nombre"
-      />
+      <div className="field-group">
+        <label>Nombre</label>
 
-      <input
-        value={apellido}
-        onChange={e => setApellido(e.target.value)}
-        placeholder="Apellido"
-      />
+        <input
+          value={nombre}
+          onChange={e => setNombre(e.target.value)}
+          placeholder="Nombre"
+        />
+      </div>
+
+      <div className="field-group">
+        <label>Apellido</label>
+
+        <input
+          value={apellido}
+          onChange={e => setApellido(e.target.value)}
+          placeholder="Apellido"
+        />
+      </div>
 
       <div className="modal-footer">
         <button

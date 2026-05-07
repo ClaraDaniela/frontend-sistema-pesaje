@@ -1,3 +1,5 @@
+{/*Aca es el componente donde se gestionan los materiales que se descargan, se selecciona la pesada a la que pertenece y se especifica que materiales se descargan*/}
+
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 

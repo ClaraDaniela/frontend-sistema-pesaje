@@ -3,8 +3,9 @@ import api from "../services/api";
 import Modal from "./Modal";
 
 function CajaModal({ onClose, onSaved }) {
+
   const [tipo, setTipo] = useState("");
-  const [descripcion, setDescripcion] = useState("");
+  const [codigo, setCodigo] = useState("");
   const [tara, setTara] = useState("");
 
   const [tiposCaja, setTiposCaja] = useState([]);
@@ -12,88 +13,144 @@ function CajaModal({ onClose, onSaved }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Cargar tipos de caja
+  // =========================
+  // CARGAR TIPOS DE CAJA
+  // =========================
   useEffect(() => {
+
     const cargarTipos = async () => {
       try {
+
         const res = await api.get("/tipos_caja");
         setTiposCaja(res.data);
+
       } catch (err) {
+
         console.error("Error cargando tipos de caja", err);
+
       }
     };
 
     cargarTipos();
+
   }, []);
 
-  // 🔹 Guardar
+  // =========================
+  // GUARDAR
+  // =========================
   const guardar = async () => {
+
     setError(null);
 
+    // VALIDACIONES
     if (!tipo) {
-      return setError("El tipo es obligatorio.");
+      return setError("Debe seleccionar un tipo.");
+    }
+
+    if (!codigo.trim()) {
+      return setError("El código es obligatorio.");
     }
 
     if (!tara || isNaN(tara) || Number(tara) < 0) {
-      return setError("Ingresá una tara válida en kg.");
+      return setError("Ingresá una tara válida.");
     }
 
     try {
+
       setLoading(true);
 
       const res = await api.post("/cajas", {
-        tipo_caja_id: tipo, // 👈 ahora es ID
-        descripcion: descripcion.trim() || null,
+        tipo_caja_id: Number(tipo),
+        codigo: codigo.trim(),
         tara_kg: Number(tara),
       });
 
       onSaved(res.data);
       onClose();
+
     } catch (err) {
-      setError(err.response?.data?.error || "Error al guardar la caja.");
+
+      console.error(err);
+
+      setError(
+        err.response?.data?.error ||
+        "Error al guardar la caja."
+      );
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
   return (
     <Modal title="Nueva caja" onClose={onClose}>
 
-      {/* ===== TIPO ===== */}
+      {/* =========================
+          TIPO
+      ========================= */}
       <div className="field-group">
+
         <label>
-          Tipo <span style={{ color: "#E24B4A" }}>*</span>
+          Tipo de caja <span style={{ color: "#E24B4A" }}>*</span>
         </label>
 
         <select
           value={tipo}
           onChange={(e) => setTipo(e.target.value)}
         >
-          <option value="">Seleccionar tipo</option>
+          <option value="">
+            Seleccionar tipo
+          </option>
+
           {tiposCaja.map((t) => (
-            <option key={t.id} value={t.id}>
+
+            <option
+              key={t.id}
+              value={t.id}
+            >
               {t.nombre}
             </option>
+
           ))}
         </select>
+
       </div>
 
-      {/* ===== DESCRIPCIÓN ===== */}
-      <div className="field-group" style={{ marginTop: "0.75rem" }}>
-        <label>Descripción</label>
+      {/* =========================
+          CÓDIGO
+      ========================= */}
+      <div
+        className="field-group"
+        style={{ marginTop: "14px" }}
+      >
+
+        <label>
+          Código <span style={{ color: "#E24B4A" }}>*</span>
+        </label>
+
         <input
           type="text"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          placeholder="Ej: Caja chica, Caja grande"
+          value={codigo}
+          onChange={(e) => setCodigo(e.target.value)}
+          placeholder="Ej: CAJ-001"
         />
+
       </div>
 
-      {/* ===== TARA ===== */}
-      <div className="field-group" style={{ marginTop: "0.75rem" }}>
+      {/* =========================
+          TARA
+      ========================= */}
+      <div
+        className="field-group"
+        style={{ marginTop: "14px" }}
+      >
+
         <label>
           Tara (kg) <span style={{ color: "#E24B4A" }}>*</span>
         </label>
+
         <input
           type="number"
           value={tara}
@@ -102,27 +159,37 @@ function CajaModal({ onClose, onSaved }) {
           min="0"
           step="1"
         />
+
       </div>
 
-      {/* ===== ERROR ===== */}
+      {/* =========================
+          ERROR
+      ========================= */}
       {error && (
-        <p
+
+        <div
           style={{
-            color: "#E24B4A",
-            fontSize: "13px",
-            marginTop: "0.5rem",
+            marginTop: "14px",
+            color: "#dc2626",
+            fontSize: "14px",
+            fontWeight: 500,
           }}
         >
           {error}
-        </p>
+        </div>
+
       )}
 
-      {/* ===== BOTONES ===== */}
+      {/* =========================
+          FOOTER
+      ========================= */}
       <div className="modal-footer">
+
         <button
           type="button"
           className="btn-secondary"
           onClick={onClose}
+          disabled={loading}
         >
           Cancelar
         </button>
@@ -135,7 +202,9 @@ function CajaModal({ onClose, onSaved }) {
         >
           {loading ? "Guardando..." : "Guardar"}
         </button>
+
       </div>
+
     </Modal>
   );
 }

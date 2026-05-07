@@ -1,72 +1,71 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
 import Logo from "../components/Logo";
 import ReportesJefe from "../components/ReportesJefe";
-import InventarioJefe from "../components/Inventario";
+import Inventario from "../components/Inventario";
 import "../styles/GestionStock.css";
 
 export default function GestionStock({ user }) {
-    const navigate = useNavigate();
-    const [stock, setStock] = useState([]);
-    const [activeTab, setActiveTab] = useState("reportes");
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("reportes");
 
+  return (
+    <div className="layout">
 
-    return (
-        <div className="layout">
+      {/* SIDEBAR */}
+      <aside className="sidebar">
+        <Logo />
 
-            {/* SIDEBAR */}
-            <aside className="sidebar">
-                <Logo />
+        <nav>
+          <button
+            className={activeTab === "reportes" ? "active" : ""}
+            onClick={() => setActiveTab("reportes")}
+          >
+            <span className="nav-icon">📊</span>
+            Gestión de stock e informes
+          </button>
 
-                <nav>
+          <button
+            className={activeTab === "inventario" ? "active" : ""}
+            onClick={() => setActiveTab("inventario")}
+          >
+            <span className="nav-icon">📦</span>
+            Inventario
+          </button>
+        </nav>
+      </aside>
 
-                    <button
-                        className={activeTab === "reportes" ? "active" : ""}
-                        onClick={() => setActiveTab("reportes")}
-                    >
-                        <span className="nav-icon">📊</span>
-                        Gestión de stock e informes
-                    </button>
+      {/* CONTENIDO */}
+      <main className="content">
 
-                    <button
-                        className={activeTab === "inventario" ? "active" : ""}
-                        onClick={() => setActiveTab("inventario")}
-                    >
-                        <span className="nav-icon">📦</span>
-                        Inventario
-                    </button>
-                </nav>
-            </aside>
-
-            {/* CONTENIDO */}
-
-            <main className="content">
-
-                <div className="topbar-right">
-                    <button
-                        className="btn-secundario"
-                        onClick={() => navigate("/")}
-                    >
-                        ← Inicio
-                    </button>
-                </div>
-                {activeTab === "reportes" && (
-                    <>
-                        <h1>Reportes</h1>
-                        <section className="table-card">
-                            <ReportesJefe stock={stock} />
-                        </section>
-                    </>
-                )}
-
-                {activeTab === "inventario" && (
-                    <>
-                        <h1>Inventario</h1>
-                        <InventarioJefe user={user} />
-                    </>
-                )}
-            </main>
+        {/* botón volver */}
+        <div className="topbar-right">
+          <button
+            className="btn-secundario"
+            onClick={() => navigate("/")}
+          >
+            ← Inicio
+          </button>
         </div>
-    );
+
+        {/* REPORTES */}
+        {activeTab === "reportes" && (
+          <>
+            <h1>Reportes</h1>
+            <section className="table-card">
+              <ReportesJefe />
+            </section>
+          </>
+        )}
+
+        {/* INVENTARIO */}
+        {activeTab === "inventario" && (
+          <>
+            <h1>Inventario</h1>
+            <Inventario user={user} />
+          </>
+        )}
+      </main>
+    </div>
+  );
 }

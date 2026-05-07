@@ -4,7 +4,7 @@
 :root {
   --azul-corp: #1F3A5F;
   --azul-medio: #2A4F7F;
-  --azul-sidebar: #1F3A5F; 
+  --azul-sidebar: #1F3A5F;
   --azul-soft: #F0F4F8;
   --gris-texto: #333;
   --gris-borde: #D1D5DB;
@@ -16,7 +16,9 @@
 /* ===============================
    RESET BÁSICO
    =============================== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -41,12 +43,15 @@ body {
    =============================== */
 .sidebar {
   width: 230px;
-  background: var(--azul-sidebar);
-  padding: 20px 14px;
+  background: linear-gradient(180deg,
+      rgba(42, 79, 127, 0.95),
+      rgba(31, 58, 95, 0.95));
+  padding: 18px 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   flex-shrink: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .sidebar nav {
@@ -56,11 +61,10 @@ body {
   margin-top: 8px;
 }
 
-/* Separador debajo del logo */
-.sidebar > *:first-child {
-  padding-bottom: 16px;
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
-  margin-bottom: 8px;
+.sidebar>*:first-child {
+  padding-bottom: 18px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sidebar button {
@@ -81,6 +85,24 @@ body {
   line-height: 1.3;
 }
 
+
+
+.logo-container {
+  height: 52px;
+  /* antes 44px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* centra el logo */
+  padding: 4px;
+}
+
+.logo-container img {
+  max-height: 100%;
+  filter: brightness(1.1);
+  /* levanta un poco el contraste */
+}
+
 .sidebar button:hover:not(.active) {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.9);
@@ -93,21 +115,23 @@ body {
 
 /* Ícono dentro del botón */
 .sidebar button .nav-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.1);
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 14px;
   flex-shrink: 0;
   transition: background 0.15s, color 0.15s;
 }
 
 .sidebar button.active .nav-icon {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--azul-corp);
 }
+
 
 /* Punto indicador en botón activo */
 .sidebar button.active::after {
@@ -172,7 +196,7 @@ body {
     padding: 12px;
   }
 
-  .sidebar > *:first-child {
+  .sidebar>*:first-child {
     border-bottom: none;
     border-right: 0.5px solid rgba(59, 125, 201, 0.12);
     padding-bottom: 0;
@@ -190,16 +214,25 @@ body {
     flex: 1;
     white-space: nowrap;
     justify-content: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    padding: 10px 12px;
   }
 
   .sidebar button.active::after {
     display: none;
+    background: rgba(255, 255, 255, 0.12);
   }
 
   .content {
     padding: 16px;
   }
 }
+
+.sidebar button:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 
 /* ===============================
    BOTONES GENERALES
@@ -329,16 +362,4 @@ body {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 20px;
-}
-.logo-container {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  padding: 0 4px;
-}
-
-.logo-container img {
-  height: 100%;
-  width: auto;
-  object-fit: contain;
 }
