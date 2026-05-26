@@ -1,17 +1,22 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import "../styles/ModalEditar.css";
+
+// Tipos que habilitan selector de caja
+const TIPOS_CON_CAJA = ["ROLL OFF", "SEMI"];
 
 export default function EditPesadaModal({
   pesada,
-  empresas,
-  choferes,
-  materiales,
+  empresas = [],
+  personal = [],
+  materiales = [],
   onClose,
   onSaved
 }) {
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
   const [cajas, setCajas] = useState([]);
+  const [personalList, setPersonalList] = useState([]);
 
   const [form, setForm] = useState({
     tipo_movimiento: "INGRESO",
@@ -25,13 +30,12 @@ export default function EditPesadaModal({
     origen: "BALANZA",
   });
 
+  // ─── Carga inicial de tipos de vehículo ───────────────────────────────────
   useEffect(() => {
-    api.get("/tipos_vehiculo")
-      .then(res => setTiposVehiculo(res.data))
-      .catch(console.error);
+    loadTiposVehiculo();
   }, []);
 
-  // cargar pesada
+  // ─── Poblar form cuando llega la pesada a editar ──────────────────────────
   useEffect(() => {
     if (!pesada) return;
 
@@ -46,56 +50,93 @@ export default function EditPesadaModal({
       peso: pesada.peso_bruto_kg || "",
       origen: pesada.origen || "BALANZA",
     });
-  }, [pesada]);
 
-  const esRollOff = (tipoVehiculoId) => {
-    const tv = tiposVehiculo.find(t => t.id === Number(tipoVehiculoId));
-    return tv?.nombre === "ROLL OFF";
-  };
-
-  // vehículos + cajas
-  useEffect(() => {
-    if (!form.tipo_vehiculo_id) return;
-
-    const load = async () => {
-      try {
-        const vehRes = await api.get("/vehiculos", {
-          params: { tipo_vehiculo_id: form.tipo_vehiculo_id },
-        });
-
-        setVehiculos(vehRes.data);
-
-        if (esRollOff(form.tipo_vehiculo_id)) {
-          const cajasRes = await api.get("/cajas");
-          setCajas(cajasRes.data);
-        } else {
-          setCajas([]);
-          setForm(f => ({ ...f, caja_id: "" }));
-        }
-
-      } catch (err) {
-        console.error(err);
+    // Si el chofer de la pesada no está en la lista, lo inyecta
+    if (pesada.personal_id && pesada.chofer_nombre) {
+      const yaEsta = personal.some(
+        (p) => Number(p.id) === Number(pesada.personal_id)
+      );
+      if (!yaEsta) {
+        const [nombre = "", apellido = ""] = pesada.chofer_nombre.split(" ");
+        setPersonalList([...personal, { id: pesada.personal_id, nombre, apellido }]);
+        return;
       }
-    };
+    }
+    setPersonalList(personal);
+  }, [pesada, personal]);
 
-    load();
+  // ─── Recargar vehículos y cajas cuando cambia el tipo de vehículo ─────────
+  useEffect(() => {
+    if (!form.tipo_vehiculo_id || tiposVehiculo.length === 0) return;
+    loadVehiculosYCajas();
   }, [form.tipo_vehiculo_id, tiposVehiculo]);
 
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  const loadTiposVehiculo = async () => {
+    try {
+      const res = await api.get("/tipos_vehiculo");
+      setTiposVehiculo(res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /** Devuelve true si el tipo de vehículo seleccionado requiere caja */
+  const tieneSeleccionCaja = (tipoVehiculoId) => {
+    const tv = tiposVehiculo.find(
+      (t) => Number(t.id) === Number(tipoVehiculoId)
+    );
+    return TIPOS_CON_CAJA.includes(tv?.nombre?.toUpperCase());
+  };
+
+  const loadVehiculosYCajas = async () => {
+    try {
+      const vehRes = await api.get("/vehiculos", {
+        params: { tipo_vehiculo_id: form.tipo_vehiculo_id },
+      });
+      setVehiculos(vehRes.data || []);
+
+      if (tieneSeleccionCaja(form.tipo_vehiculo_id)) {
+        const cajasRes = await api.get("/cajas");
+        setCajas(cajasRes.data || []);
+      } else {
+        setCajas([]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ─── Handlers ─────────────────────────────────────────────────────────────
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
+
+    setForm((prev) => {
+      const next = { ...prev, [name]: value };
+
+      // Al cambiar tipo de vehículo → limpiar vehículo y caja
+      // para no dejar IDs de otro tipo que rompan la FK
+      if (name === "tipo_vehiculo_id") {
+        next.vehiculo_id = "";
+        next.caja_id = "";
+      }
+
+      return next;
+    });
   };
+
+  const handleTipoMovimiento = (tipo) =>
+    setForm((prev) => ({ ...prev, tipo_movimiento: tipo }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const payload = {
         tipo_movimiento: form.tipo_movimiento,
-        empresa_id: Number(form.empresa_id),
-        personal_id: Number(form.personal_id),
-        material_general_id: Number(form.material_general_id),
-        vehiculo_id: Number(form.vehiculo_id),
+        empresa_id: form.empresa_id ? Number(form.empresa_id) : null,
+        personal_id: form.personal_id ? Number(form.personal_id) : null,
+        material_general_id: form.material_general_id ? Number(form.material_general_id) : null,
+        vehiculo_id: form.vehiculo_id ? Number(form.vehiculo_id) : null,
         caja_id: form.caja_id ? Number(form.caja_id) : null,
       };
 
@@ -104,9 +145,8 @@ export default function EditPesadaModal({
       }
 
       await api.put(`/pesadas/${pesada.id}`, payload);
-
-      onSaved?.();
-      onClose?.();
+      if (onSaved) onSaved();
+      if (onClose) onClose();
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.error || "Error al actualizar la pesada");
@@ -115,7 +155,19 @@ export default function EditPesadaModal({
 
   if (!pesada) return null;
 
+  // ─── Derivados para el render ──────────────────────────────────────────────
   const puedeEditarPeso = form.origen === "MANUAL";
+  const mostrarCaja = tieneSeleccionCaja(form.tipo_vehiculo_id);
+
+  // Solo mostrar personal activo + el chofer original de la pesada (aunque esté inactivo)
+  const personalActivo = personalList.filter(
+    (p) => p.activo !== 0 || Number(p.id) === Number(pesada.personal_id)
+  );
+
+  // Solo mostrar empresas activas + la empresa original de la pesada
+  const empresasActivas = empresas.filter(
+    (e) => e.activo !== 0 || Number(e.id) === Number(pesada.empresa_id)
+  );
 
   return (
     <div className="modal-overlay">
@@ -124,79 +176,128 @@ export default function EditPesadaModal({
 
         <form onSubmit={handleSubmit}>
 
-          {/* movimiento */}
-          <button type="button" onClick={() => setForm(f => ({ ...f, tipo_movimiento: "INGRESO" }))}>
-            Ingreso
-          </button>
+          {/* ── Tipo movimiento ── */}
+          <div className="tipo-movimiento-toggle">
+            <button
+              type="button"
+              className={form.tipo_movimiento === "INGRESO" ? "active" : ""}
+              onClick={() => handleTipoMovimiento("INGRESO")}
+            >
+              Ingreso
+            </button>
+            <button
+              type="button"
+              className={form.tipo_movimiento === "EGRESO" ? "active" : ""}
+              onClick={() => handleTipoMovimiento("EGRESO")}
+            >
+              Egreso
+            </button>
+          </div>
 
-          <button type="button" onClick={() => setForm(f => ({ ...f, tipo_movimiento: "EGRESO" }))}>
-            Egreso
-          </button>
-
-          {/* empresa */}
-          <select name="empresa_id" value={form.empresa_id} onChange={handleChange}>
+          {/* ── Empresa (solo activas) ── */}
+          <select
+            name="empresa_id"
+            value={String(form.empresa_id || "")}
+            onChange={handleChange}
+          >
             <option value="">Empresa</option>
-            {empresas.map(e => (
-              <option key={e.id} value={e.id}>{e.nombre}</option>
-            ))}
-          </select>
-
-          {/* chofer -> personal */}
-          <select name="personal_id" value={form.personal_id} onChange={handleChange}>
-            <option value="">Chofer</option>
-            {choferes.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.nombre} {c.apellido}
+            {empresasActivas.map((e) => (
+              <option key={e.id} value={String(e.id)}>
+                {e.nombre}
               </option>
             ))}
           </select>
 
-          {/* material */}
-          <select name="material_general_id" value={form.material_general_id} onChange={handleChange}>
+          {/* ── Chofer (solo activos) ── */}
+          <select
+            name="personal_id"
+            value={String(form.personal_id || "")}
+            onChange={handleChange}
+          >
+            <option value="">Chofer</option>
+            {personalActivo.map((p) => (
+              <option key={p.id} value={String(p.id)}>
+                {p.nombre} {p.apellido}
+              </option>
+            ))}
+          </select>
+
+          {/* ── Material ── */}
+          <select
+            name="material_general_id"
+            value={form.material_general_id}
+            onChange={handleChange}
+          >
             <option value="">Material</option>
-            {materiales.map(m => (
-              <option key={m.id} value={m.id}>{m.nombre}</option>
+            {materiales.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.nombre}
+              </option>
             ))}
           </select>
 
-          {/* tipo vehiculo */}
-          <select name="tipo_vehiculo_id" value={form.tipo_vehiculo_id} onChange={handleChange}>
+          {/* ── Tipo vehículo ── */}
+          <select
+            name="tipo_vehiculo_id"
+            value={form.tipo_vehiculo_id}
+            onChange={handleChange}
+          >
             <option value="">Tipo vehículo</option>
-            {tiposVehiculo.map(t => (
-              <option key={t.id} value={t.id}>{t.nombre}</option>
+            {tiposVehiculo.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.nombre}
+              </option>
             ))}
           </select>
 
-          {/* vehiculo */}
-          <select name="vehiculo_id" value={form.vehiculo_id} onChange={handleChange}>
-            <option value="">Vehículo</option>
-            {vehiculos.map(v => (
-              <option key={v.id} value={v.id}>{v.patente}</option>
+          {/* ── Vehículo (filtrado por tipo) ── */}
+          <select
+            name="vehiculo_id"
+            value={form.vehiculo_id}
+            onChange={handleChange}
+            disabled={!form.tipo_vehiculo_id}
+          >
+            <option value="">
+              {form.tipo_vehiculo_id ? "Vehículo" : "Seleccioná un tipo primero"}
+            </option>
+            {vehiculos.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.patente}
+              </option>
             ))}
           </select>
 
-          {/* caja solo roll off */}
-          {esRollOff(form.tipo_vehiculo_id) && (
-            <select name="caja_id" value={form.caja_id} onChange={handleChange}>
+          {/* ── Caja (solo si ROLL OFF o SEMI) ── */}
+          {mostrarCaja && (
+            <select
+              name="caja_id"
+              value={form.caja_id}
+              onChange={handleChange}
+            >
               <option value="">Caja</option>
-              {cajas.map(c => (
-                <option key={c.id} value={c.id}>{c.codigo}</option>
+              {cajas.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.codigo}
+                </option>
               ))}
             </select>
           )}
 
-          {/* peso */}
+          {/* ── Peso ── */}
           <input
             type="number"
             name="peso"
             value={form.peso}
             onChange={handleChange}
             disabled={!puedeEditarPeso}
+            placeholder="Peso"
           />
 
-          {/* actions */}
-          <button type="button" onClick={onClose}>Cancelar</button>
-          <button type="submit">Guardar</button>
+          {/* ── Acciones ── */}
+          <div className="modal-footer">
+            <button type="button" onClick={onClose}>Cancelar</button>
+            <button type="submit">Guardar</button>
+          </div>
 
         </form>
       </div>

@@ -1,12 +1,25 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import Logo from "../components/Logo";
-import ReportesJefe from "../components/ReportesJefe";
+
+import StockMaterialesGenerales from "../components/StockMaterialesGenerales";
+import StockMaterialesDescargas from "../components/StockMaterialesDescarga";
+
 import Inventario from "../components/Inventario";
+
 import "../styles/GestionStock.css";
 
+import {
+  ChartNoAxesCombined,
+  PackageOpen,
+  Boxes
+} from "lucide-react";
+
 export default function GestionStock({ user }) {
+
   const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("reportes");
 
   return (
@@ -14,31 +27,45 @@ export default function GestionStock({ user }) {
 
       {/* SIDEBAR */}
       <aside className="sidebar">
+
         <Logo />
 
         <nav>
+
+          {/* STOCK GENERALES */}
           <button
             className={activeTab === "reportes" ? "active" : ""}
             onClick={() => setActiveTab("reportes")}
           >
-            <span className="nav-icon">📊</span>
-            Gestión de stock e informes
+            <ChartNoAxesCombined />
+            Materiales generales
           </button>
 
+          {/* STOCK DESCARGA */}
+          <button
+            className={activeTab === "descarga" ? "active" : ""}
+            onClick={() => setActiveTab("descarga")}
+          >
+            <Boxes />
+            Materiales descarga
+          </button>
+
+          {/* INVENTARIO */}
           <button
             className={activeTab === "inventario" ? "active" : ""}
             onClick={() => setActiveTab("inventario")}
           >
-            <span className="nav-icon">📦</span>
+            <PackageOpen />
             Inventario
           </button>
+
         </nav>
       </aside>
 
       {/* CONTENIDO */}
       <main className="content">
 
-        {/* botón volver */}
+        {/* BOTÓN VOLVER */}
         <div className="topbar-right">
           <button
             className="btn-secundario"
@@ -48,12 +75,24 @@ export default function GestionStock({ user }) {
           </button>
         </div>
 
-        {/* REPORTES */}
+        {/* STOCK GENERALES */}
         {activeTab === "reportes" && (
           <>
-            <h1>Reportes</h1>
+            <h1>Materiales de las pesadas</h1>
+
             <section className="table-card">
-              <ReportesJefe />
+              <StockMaterialesGenerales />
+            </section>
+          </>
+        )}
+
+        {/* STOCK DESCARGA */}
+        {activeTab === "descarga" && (
+          <>
+            <h1>Materiales de descarga</h1>
+
+            <section className="table-card">
+              <StockMaterialesDescargas />
             </section>
           </>
         )}
@@ -62,9 +101,11 @@ export default function GestionStock({ user }) {
         {activeTab === "inventario" && (
           <>
             <h1>Inventario</h1>
+
             <Inventario user={user} />
           </>
         )}
+
       </main>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Select from "react-select";
 import api from "../services/api";
+import {Truck, File, Building2, Scale} from "lucide-react";
 
 import EmpresaModal from "./EmpresaModal";
 import ChoferModal from "./ChoferModal";
@@ -184,7 +185,7 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
             ? "✔ Pesada guardada correctamente (dentro de tolerancia)"
             : "Pesada guardada, pero FUERA de tolerancia")
           : "Pesada guardada correctamente",
-        id: p.id 
+        id: p.id
       });
 
       setForm({
@@ -213,7 +214,7 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
 
   const empresaOptions = empresas.map(e => ({ value: e.id, label: e.nombre }));
   const personalOptions = personal.map(c => ({
-    value: c.id_personal,
+    value: c.id,
     label: `${c.nombre} ${c.apellido}`,
   }));
   const materialOptions = materiales.map(m => ({ value: m.id, label: m.nombre }));
@@ -230,7 +231,7 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
       <form onSubmit={submit}>
         <div className="section-card">
           <div className="section-header">
-            <div className="section-icon icon-blue">⚖️</div>
+            <Scale />
             <div></div>
           </div>
 
@@ -338,7 +339,7 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
         {/* ===== DATOS DEL VIAJE ===== */}
         <div className="section-card">
           <div className="section-header">
-            <div className="section-icon icon-teal">👤</div>
+            <Building2 />
             <div>
               <div className="section-title">Datos del viaje</div>
               <div className="section-subtitle">Empresa, chofer y material transportado</div>
@@ -401,7 +402,7 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
         {/* ===== DATOS DOCUMENTACIÓN ===== */}
         <div className="section-card">
           <div className="section-header">
-            <div className="section-icon icon-purple">📄</div>
+            <File />
             <div>
               <div className="section-title">Documentación</div>
             </div>
@@ -416,6 +417,9 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
                 onChange={e => setForm(f => ({ ...f, nro_manifiesto: e.target.value }))}
                 placeholder="Opcional"
               />
+              <small className="field-help">
+
+              </small>
             </div>
 
             <div className="field-group">
@@ -425,6 +429,9 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
                 onChange={e => setForm(f => ({ ...f, nro_remito: e.target.value }))}
                 placeholder="Opcional"
               />
+              <small className="field-help">
+
+              </small>
             </div>
 
             <div className="field-group">
@@ -435,16 +442,22 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
                 onChange={e => setForm(f => ({ ...f, peso_declarado_kg: e.target.value }))}
                 placeholder="Opcional"
               />
+              <small className="field-help">
+
+              </small>
             </div>
 
             <div className="field-group">
-              <label>Peso de egreso</label>
+              <label>Tara real (camión vacío)</label>
               <input
                 type="number"
                 value={form.tara_real_kg}
                 onChange={e => setForm(f => ({ ...f, tara_real_kg: e.target.value }))}
-                placeholder="Peso del camión vacio"
+                placeholder="Peso real del vehículo vacío"
               />
+              <small className="field-help">
+                Si se informa la tara real, la pesada se cerrará automáticamente.
+              </small>
             </div>
 
           </div>
@@ -453,7 +466,7 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
         {/* ===== VEHÍCULO ===== */}
         <div className="section-card">
           <div className="section-header">
-            <div className="section-icon icon-amber">🚛</div>
+            <Truck />
             <div>
               <div className="section-title">Vehículo</div>
               <div className="section-subtitle">Tipo, patente y caja</div>

@@ -1,4 +1,5 @@
-{/*Aca es el componente donde se gestionan los materiales que se descargan, se selecciona la pesada a la que pertenece y se especifica que materiales se descargan*/}
+{/*Aca es el componente donde se gestionan los materiales que se descargan, se selecciona la pesada a la que
+   pertenece y se especifica que materiales se descargan*/}
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -70,9 +71,13 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [comboId]);
 
-  const kg = pesoNeto && fila.porcentaje
-    ? ((pesoNeto * fila.porcentaje) / 100).toFixed(2)
-    : "";
+  const porcentajeNum = Number(fila.porcentaje || 0);
+  const pesoNetoNum = Number(pesoNeto || 0);
+
+  const kg =
+    porcentajeNum > 0 && pesoNetoNum > 0
+      ? ((pesoNetoNum * porcentajeNum) / 100).toFixed(2)
+      : "";
 
   const sel = {
     padding: "6px 8px",
@@ -227,29 +232,55 @@ export default function Descarga() {
   // ── guardar ──
   const guardar = async () => {
     if (!pesadaSeleccionada) return alert("Seleccioná una pesada");
-    if (Math.round(totalPorcentaje) !== 100) return alert("Los porcentajes deben sumar 100%");
-    const filasInvalidas = filas.filter(f => !f.material_id || !f.porcentaje);
-    if (filasInvalidas.length) return alert("Completá todos los materiales y porcentajes");
+
+    if (Math.round(totalPorcentaje) !== 100) {
+      return alert("Los porcentajes deben sumar 100%");
+    }
+
+    const filasInvalidas = filas.filter(
+      f => !f.material_id || !f.porcentaje
+    );
+
+    if (filasInvalidas.length) {
+      return alert("Completá todos los materiales y porcentajes");
+    }
+
+    const payload = {
+      pesada_id: pesadaSeleccionada,
+      responsable: 1,
+      comentarios,
+      materiales: filas.map(f => ({
+        material_id: Number(f.material_id),
+        porcentaje: Number(f.porcentaje)
+      }))
+    };
+
+    console.log(JSON.stringify(payload, null, 2));
 
     setGuardando(true);
+
     try {
       const res = await fetch("/api/descargas", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          pesada_id: pesadaSeleccionada,
-          responsable: 1,
-          comentarios,
-          materiales: filas.map(f => ({ id: f.material_id, porcentaje: f.porcentaje })),
-        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload),
       });
-      if (res.ok) { alert("Descarga guardada"); navigate("/"); }
-      else { alert("Error al guardar"); }
+
+      if (res.ok) {
+        alert("Descarga guardada");
+        navigate("/");
+      } else {
+        const data = await res.json();
+        console.log(data);
+        alert(data.error || "Error al guardar");
+      }
+
     } finally {
       setGuardando(false);
     }
   };
-
   // ─────────────────────────────────────────────────────────────────────────
 
   const card = {
@@ -269,7 +300,7 @@ export default function Descarga() {
       <div style={value}>{children ?? v ?? "—"}</div>
     </div>
   );
-  
+
   return (
     <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 16px", fontFamily: "sans-serif" }}>
       <div className="topbar-right">
@@ -309,6 +340,7 @@ export default function Descarga() {
             <InfoItem l="Chofer" v={`${pesada.personal_nombre} ${pesada.personal_apellido}`} />
             <InfoItem l="Vehículo" v={pesada.patente} />
             <InfoItem l="Tipo" v={pesada.tipo_vehiculo} />
+            <InfoItem l="Material" v={pesada.material} />
             <InfoItem l="Fecha" v={new Date(pesada.fecha).toLocaleString("es-AR")} />
             <InfoItem l="Movimiento" v={pesada.tipo_movimiento} />
           </div>
@@ -365,7 +397,11 @@ export default function Descarga() {
               key={i}
               fila={f}
               index={i}
-              pesoNeto={pesada.peso_neto}
+              pesoNeto={
+                pesada.peso_neto_real_kg ??
+                pesada.peso_neto_estimado_kg ??
+                0
+              }
               catalogos={catalogos}
               onActualizar={actualizarFila}
               onEliminar={eliminarFila}
