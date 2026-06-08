@@ -1,19 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
-
 import "../styles/ModalCierre.css";
-
 import { CircleX } from "lucide-react";
 
-/**
- * Modal para cerrar pesada
- */
-export default function CerrarPesadaModal({
-  pesada,
-  balanzaDisponible = true,
-  onClose,
-  onCerrada,
-}) {
+export default function CerrarPesadaModal({ pesada, balanzaDisponible = true, onClose, onCerrada, }) {
 
   const [origen, setOrigen] = useState("BALANZA");
 
@@ -27,10 +17,6 @@ export default function CerrarPesadaModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // =========================
-  // DATOS
-  // =========================
-
   const pesoEntrada =
     pesada?.peso_bruto_kg ??
     pesada?.peso_entrada_kg ??
@@ -40,35 +26,17 @@ export default function CerrarPesadaModal({
     origen === "BALANZA"
       ? pesoBalanza
       : pesoManual
-      ? Number(pesoManual)
-      : null;
+        ? Number(pesoManual)
+        : null;
 
   const pesoNeto =
     pesoEntrada != null && pesoSalida != null
       ? pesoEntrada - pesoSalida
       : null;
 
-  // Compatibilidad con distintos formatos de backend
-  const empresaNombre =
-    pesada?.empresa?.nombre ||
-    pesada?.empresa_nombre ||
-    pesada?.empresa ||
-    "—";
-
-  const materialNombre =
-    pesada?.material?.nombre ||
-    pesada?.material_nombre ||
-    pesada?.material ||
-    "—";
-
-  const patente =
-    pesada?.vehiculo?.patente ||
-    pesada?.patente ||
-    "—";
-
-  // =========================
-  // POLLING BALANZA
-  // =========================
+  const empresaNombre = pesada?.empresa || "—";
+  const materialNombre = pesada?.material || "—";
+  const patente = pesada?.patente || "—";
 
   useEffect(() => {
 
@@ -107,9 +75,6 @@ export default function CerrarPesadaModal({
 
   }, [origen, balanzaDisponible]);
 
-  // =========================
-  // CAMBIAR ORIGEN
-  // =========================
 
   const handleOrigenChange = (nuevoOrigen) => {
 
@@ -124,10 +89,6 @@ export default function CerrarPesadaModal({
 
     setError("");
   };
-
-  // =========================
-  // SUBMIT
-  // =========================
 
   const submit = async () => {
 
@@ -195,20 +156,16 @@ export default function CerrarPesadaModal({
 
     }
   };
-
   return (
     <div
       className="modal-overlay"
-      onClick={(e) =>
-        e.target === e.currentTarget && onClose()
-      }
+      onClick={onClose}
     >
+      <div
+        className="modal-card cerrar-pesada-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
 
-      <div className="modal-card cerrar-pesada-modal">
-
-        {/* =========================
-             HEADER
-        ========================= */}
 
         <div className="modal-header">
 
@@ -239,9 +196,6 @@ export default function CerrarPesadaModal({
 
         </div>
 
-        {/* =========================
-             RESUMEN
-        ========================= */}
 
         <div className="pesada-resumen">
 
@@ -287,9 +241,6 @@ export default function CerrarPesadaModal({
 
         </div>
 
-        {/* =========================
-             ORIGEN
-        ========================= */}
 
         <div className="field-group">
 
@@ -301,9 +252,8 @@ export default function CerrarPesadaModal({
 
             <button
               type="button"
-              className={`toggle-btn ${
-                origen === "BALANZA" ? "active" : ""
-              }`}
+              className={`toggle-btn ${origen === "BALANZA" ? "active" : ""
+                }`}
               onClick={() =>
                 handleOrigenChange("BALANZA")
               }
@@ -313,9 +263,8 @@ export default function CerrarPesadaModal({
 
             <button
               type="button"
-              className={`toggle-btn ${
-                origen === "MANUAL" ? "active" : ""
-              }`}
+              className={`toggle-btn ${origen === "MANUAL" ? "active" : ""
+                }`}
               onClick={() =>
                 handleOrigenChange("MANUAL")
               }
@@ -326,10 +275,6 @@ export default function CerrarPesadaModal({
           </div>
 
         </div>
-
-        {/* =========================
-             BALANZA
-        ========================= */}
 
         {origen === "BALANZA" && (
 
@@ -342,9 +287,8 @@ export default function CerrarPesadaModal({
             <div className="peso-display">
 
               <div
-                className={`peso-dot ${
-                  !balanzaOk ? "off" : ""
-                }`}
+                className={`peso-dot ${!balanzaOk ? "off" : ""
+                  }`}
               />
 
               <span className="peso-value">
@@ -360,10 +304,6 @@ export default function CerrarPesadaModal({
           </div>
 
         )}
-
-        {/* =========================
-             MANUAL
-        ========================= */}
 
         {origen === "MANUAL" && (
           <>
@@ -384,6 +324,7 @@ export default function CerrarPesadaModal({
                 onChange={(e) =>
                   setPasswordManual(e.target.value)
                 }
+                onClick={(e) => e.stopPropagation()}
               />
 
             </div>
@@ -402,6 +343,7 @@ export default function CerrarPesadaModal({
                 onChange={(e) =>
                   setPesoManual(e.target.value)
                 }
+                onClick={(e) => e.stopPropagation()}
               />
 
             </div>
@@ -417,6 +359,7 @@ export default function CerrarPesadaModal({
                 onChange={(e) =>
                   setMotivoManual(e.target.value)
                 }
+                onClick={(e) => e.stopPropagation()}
               />
 
             </div>
@@ -424,16 +367,11 @@ export default function CerrarPesadaModal({
           </>
         )}
 
-        {/* =========================
-             PESO NETO
-        ========================= */}
-
         {pesoNeto != null && (
 
           <div
-            className={`peso-neto-preview ${
-              pesoNeto < 0 ? "negativo" : ""
-            }`}
+            className={`peso-neto-preview ${pesoNeto < 0 ? "negativo" : ""
+              }`}
           >
 
             <span className="peso-neto-label">
@@ -452,17 +390,11 @@ export default function CerrarPesadaModal({
 
         )}
 
-        {/* ERROR */}
-
         {error && (
           <div className="form-error">
             {error}
           </div>
         )}
-
-        {/* =========================
-             FOOTER
-        ========================= */}
 
         <div className="footer-row">
 

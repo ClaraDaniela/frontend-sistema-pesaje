@@ -65,13 +65,11 @@ export default function EditPesadaModal({
     setPersonalList(personal);
   }, [pesada, personal]);
 
-  // ─── Recargar vehículos y cajas cuando cambia el tipo de vehículo ─────────
   useEffect(() => {
     if (!form.tipo_vehiculo_id || tiposVehiculo.length === 0) return;
     loadVehiculosYCajas();
   }, [form.tipo_vehiculo_id, tiposVehiculo]);
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
   const loadTiposVehiculo = async () => {
     try {
       const res = await api.get("/tipos_vehiculo");
@@ -81,12 +79,11 @@ export default function EditPesadaModal({
     }
   };
 
-  /** Devuelve true si el tipo de vehículo seleccionado requiere caja */
   const tieneSeleccionCaja = (tipoVehiculoId) => {
     const tv = tiposVehiculo.find(
       (t) => Number(t.id) === Number(tipoVehiculoId)
     );
-    return TIPOS_CON_CAJA.includes(tv?.nombre?.toUpperCase());
+    return tv?.requiere_caja === 1 || tv?.requiere_caja === true;
   };
 
   const loadVehiculosYCajas = async () => {
@@ -107,15 +104,12 @@ export default function EditPesadaModal({
     }
   };
 
-  // ─── Handlers ─────────────────────────────────────────────────────────────
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     setForm((prev) => {
       const next = { ...prev, [name]: value };
 
-      // Al cambiar tipo de vehículo → limpiar vehículo y caja
-      // para no dejar IDs de otro tipo que rompan la FK
       if (name === "tipo_vehiculo_id") {
         next.vehiculo_id = "";
         next.caja_id = "";
@@ -155,16 +149,13 @@ export default function EditPesadaModal({
 
   if (!pesada) return null;
 
-  // ─── Derivados para el render ──────────────────────────────────────────────
   const puedeEditarPeso = form.origen === "MANUAL";
   const mostrarCaja = tieneSeleccionCaja(form.tipo_vehiculo_id);
 
-  // Solo mostrar personal activo + el chofer original de la pesada (aunque esté inactivo)
   const personalActivo = personalList.filter(
     (p) => p.activo !== 0 || Number(p.id) === Number(pesada.personal_id)
   );
 
-  // Solo mostrar empresas activas + la empresa original de la pesada
   const empresasActivas = empresas.filter(
     (e) => e.activo !== 0 || Number(e.id) === Number(pesada.empresa_id)
   );
@@ -176,7 +167,6 @@ export default function EditPesadaModal({
 
         <form onSubmit={handleSubmit}>
 
-          {/* ── Tipo movimiento ── */}
           <div className="tipo-movimiento-toggle">
             <button
               type="button"
@@ -194,7 +184,6 @@ export default function EditPesadaModal({
             </button>
           </div>
 
-          {/* ── Empresa (solo activas) ── */}
           <select
             name="empresa_id"
             value={String(form.empresa_id || "")}
@@ -208,7 +197,6 @@ export default function EditPesadaModal({
             ))}
           </select>
 
-          {/* ── Chofer (solo activos) ── */}
           <select
             name="personal_id"
             value={String(form.personal_id || "")}
@@ -222,7 +210,6 @@ export default function EditPesadaModal({
             ))}
           </select>
 
-          {/* ── Material ── */}
           <select
             name="material_general_id"
             value={form.material_general_id}
@@ -236,7 +223,6 @@ export default function EditPesadaModal({
             ))}
           </select>
 
-          {/* ── Tipo vehículo ── */}
           <select
             name="tipo_vehiculo_id"
             value={form.tipo_vehiculo_id}
@@ -250,7 +236,6 @@ export default function EditPesadaModal({
             ))}
           </select>
 
-          {/* ── Vehículo (filtrado por tipo) ── */}
           <select
             name="vehiculo_id"
             value={form.vehiculo_id}
@@ -267,7 +252,6 @@ export default function EditPesadaModal({
             ))}
           </select>
 
-          {/* ── Caja (solo si ROLL OFF o SEMI) ── */}
           {mostrarCaja && (
             <select
               name="caja_id"
@@ -283,7 +267,6 @@ export default function EditPesadaModal({
             </select>
           )}
 
-          {/* ── Peso ── */}
           <input
             type="number"
             name="peso"
@@ -293,7 +276,6 @@ export default function EditPesadaModal({
             placeholder="Peso"
           />
 
-          {/* ── Acciones ── */}
           <div className="modal-footer">
             <button type="button" onClick={onClose}>Cancelar</button>
             <button type="submit">Guardar</button>

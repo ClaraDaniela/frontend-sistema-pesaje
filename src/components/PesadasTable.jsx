@@ -21,11 +21,9 @@ export default function PesadasTable({
   const [pesadaACerrar, setPesadaACerrar] = useState(null);
   const [exito, setExito] = useState(null);
 
-  // Opciones para los selects
   const empresaOptions = empresas.map((e) => ({ value: e.id, label: e.nombre }));
   const tipoVehiculoOptions = tipoVehiculo.map((t) => ({ value: t.id, label: t.nombre }));
 
-  // Filtrar vehículos por tipo seleccionado
   const vehiculosFiltrados = filtros.tipo_vehiculo_id
     ? vehiculos.filter((v) => v.tipo_vehiculo_id === Number(filtros.tipo_vehiculo_id))
     : vehiculos;
@@ -53,7 +51,6 @@ export default function PesadasTable({
   return (
     <div className="pesadas-table-container">
 
-      {/* ===== FILTROS ===== */}
       <div className="pesadas-filtros-card">
         <div className="section-header">
           <Search />
@@ -159,10 +156,8 @@ export default function PesadasTable({
         </div>
       </div>
 
-      {/* ===== ALERTA ÉXITO ===== */}
       {exito && <div className="alert-success">{exito}</div>}
 
-      {/* ===== TABLA ===== */}
       <table className="pesadas-table">
         <thead>
           <tr>
@@ -257,7 +252,6 @@ export default function PesadasTable({
         </tbody>
       </table>
 
-      {/* ===== MODAL CIERRE ===== */}
       {pesadaACerrar && (
         <CerrarPesadaModal
           pesada={pesadaACerrar}

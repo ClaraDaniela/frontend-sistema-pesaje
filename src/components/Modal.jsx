@@ -1,4 +1,3 @@
-// components/Modal.jsx
 function Modal({ title, children, onClose }) {
   return (
     <div className="modal-overlay">

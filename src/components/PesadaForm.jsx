@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Select from "react-select";
 import api from "../services/api";
-import {Truck, File, Building2, Scale} from "lucide-react";
+import { Truck, File, Building2, Scale } from "lucide-react";
 
 import EmpresaModal from "./EmpresaModal";
 import ChoferModal from "./ChoferModal";
@@ -173,14 +173,14 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
       });
 
       const id = res.data.id;
-
       const detalle = await api.get(`/pesadas/${id}`);
-
       const p = detalle.data;
 
+      const tienePesoDeclarado = p.peso_declarado_kg != null && Number(p.peso_declarado_kg) > 0;
+
       setResultado({
-        tipo: p.dentro_tolerancia ? "ok" : "warning",
-        mensaje: p.peso_declarado_kg != null
+        tipo: tienePesoDeclarado ? (p.dentro_tolerancia ? "ok" : "warning") : "ok",
+        mensaje: tienePesoDeclarado
           ? (p.dentro_tolerancia
             ? "✔ Pesada guardada correctamente (dentro de tolerancia)"
             : "Pesada guardada, pero FUERA de tolerancia")
@@ -237,7 +237,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
 
           <div className="field-grid-horizontal">
 
-            {/* Movimiento */}
             <div className="field-group">
               <label>Movimiento</label>
               <div className="toggle-group">
@@ -258,7 +257,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               </div>
             </div>
 
-            {/* Origen del peso */}
             <div className="field-group">
               <label>Origen del peso</label>
               <div className="toggle-group">
@@ -279,7 +277,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               </div>
             </div>
 
-            {/* Peso balanza */}
             {form.origen === "BALANZA" && (
               <div className="field-group">
                 <label>Peso leído</label>
@@ -294,7 +291,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               </div>
             )}
 
-            {/* Peso manual */}
             {form.origen === "MANUAL" && (
               <>
                 <div className="field-group">
@@ -336,7 +332,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
           </div>
         </div>
 
-        {/* ===== DATOS DEL VIAJE ===== */}
         <div className="section-card">
           <div className="section-header">
             <Building2 />
@@ -348,7 +343,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
 
           <div className="field-grid-horizontal">
 
-            {/* Empresa */}
             <div className="field-group">
               <label>Empresa</label>
               <div className="select-with-btn">
@@ -363,7 +357,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               </div>
             </div>
 
-            {/* Personal/Chofer */}
             <div className="field-group">
               <label>Chofer</label>
               <div className="select-with-btn">
@@ -381,7 +374,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               </div>
             </div>
 
-            {/* Material */}
             <div className="field-group">
               <label>Material</label>
               <div className="select-with-btn">
@@ -399,7 +391,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
           </div>
         </div>
 
-        {/* ===== DATOS DOCUMENTACIÓN ===== */}
         <div className="section-card">
           <div className="section-header">
             <File />
@@ -463,7 +454,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
           </div>
         </div>
 
-        {/* ===== VEHÍCULO ===== */}
         <div className="section-card">
           <div className="section-header">
             <Truck />
@@ -475,7 +465,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
 
           <div className="field-grid-horizontal">
 
-            {/* Tipo de vehículo */}
             <div className="field-group">
               <label>Tipo de vehículo</label>
               <Select
@@ -487,7 +476,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               />
             </div>
 
-            {/* Patente */}
             <div className="field-group">
               <label>Patente</label>
               <div className="select-with-btn">
@@ -510,7 +498,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               </div>
             </div>
 
-            {/* Tipo de caja → solo Roll Off o Semi y si hay patente */}
             {["ROLL OFF", "CAMIÓN SEMIRREMOLQUE"].includes(tipoVehiculoSeleccionado?.nombre) && form.vehiculo_id && (
               <div className="field-group">
                 <label>Tipo de caja</label>
@@ -528,7 +515,6 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               </div>
             )}
 
-            {/* Caja / Semi → solo si se seleccionó tipo de caja */}
             {tipoCajaSeleccionado && (
               <div className="field-group">
                 <label>Caja / Semi</label>
@@ -548,13 +534,11 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
           </div>
         </div>
 
-        {/* ===== FOOTER ===== */}
         <div className="footer-row">
           <button type="button" className="btn-secondary">Cancelar</button>
           <button type="submit" className="btn-primary">💾 Guardar pesada</button>
         </div>
 
-        {/* ===== MODALES ===== */}
         {showEmpresa && (
           <EmpresaModal
             onClose={() => setShowEmpresa(false)}

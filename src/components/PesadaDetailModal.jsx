@@ -28,7 +28,6 @@ export default function PesadaDetailModal({ pesada, onClose }) {
       >
         <h3>Detalle de pesada #{pesada.id}</h3>
 
-        {/* DATOS GENERALES */}
         <p>
           <b>Fecha:</b>{" "}
           {fecha.toLocaleDateString("es-AR")}{" "}
@@ -53,7 +52,6 @@ export default function PesadaDetailModal({ pesada, onClose }) {
 
         <hr />
 
-        {/* VIAJE */}
         <p>
           <b>Empresa:</b> {pesada.empresa}
         </p>
@@ -70,7 +68,6 @@ export default function PesadaDetailModal({ pesada, onClose }) {
 
         <hr />
 
-        {/* VEHICULO */}
         <p>
           <b>Patente:</b> {pesada.patente}
         </p>
@@ -94,7 +91,6 @@ export default function PesadaDetailModal({ pesada, onClose }) {
 
         <hr />
 
-        {/* DOCUMENTOS */}
         <p>
           <b>N° Manifiesto:</b>{" "}
           {pesada.nro_manifiesto || "-"}
@@ -107,7 +103,6 @@ export default function PesadaDetailModal({ pesada, onClose }) {
 
         <hr />
 
-        {/* PESOS */}
         <p>
           <b>Ingreso (bruto):</b>{" "}
           {formatKg(pesada.peso_bruto_kg)}
@@ -157,7 +152,6 @@ export default function PesadaDetailModal({ pesada, onClose }) {
           <span>{formatKg(material)}</span>
         </p>
 
-        {/* VALIDACION */}
         {pesada.peso_declarado_kg != null && (
           <div
             className={

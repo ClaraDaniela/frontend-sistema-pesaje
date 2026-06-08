@@ -5,9 +5,7 @@ import {Download} from "lucide-react";
 export default function Inventario({ user }) {
 
   const [inventario, setInventario] = useState([]);
-
   const [inputs, setInputs] = useState({});
-
   const [loading, setLoading] = useState(false);
 
   const loadInventario = async () => {

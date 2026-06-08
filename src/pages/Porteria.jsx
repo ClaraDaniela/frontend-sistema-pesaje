@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
-
 import PesadaForm from "../components/PesadaForm";
 import Logo from "../components/Logo";
-
 import { Scale } from "lucide-react";
 
 export default function Porteria() {
@@ -61,7 +59,6 @@ export default function Porteria() {
   return (
     <div className="container">
 
-      {/* TOPBAR */}
       <div className="topbar">
 
         <Logo />
@@ -81,7 +78,6 @@ export default function Porteria() {
 
       <h1>Sistema de Pesaje</h1>
 
-      {/* FORMULARIO */}
       <section className="section-card">
 
         <div className="section-header">

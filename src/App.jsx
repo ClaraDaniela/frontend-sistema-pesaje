@@ -6,6 +6,7 @@ import PlayaMateriales from "./pages/PlayaMateriales";
 import GestionStock from "./pages/GestionStock";
 import PaginaPrincipal from "./pages/PaginaPrincipal";
 import Registros from "./pages/Registros";
+import AdminUsuariosPanel from "./pages/AdminUsuariosPanel";
 import Login from "./components/Login";
 import "./styles/servieco.css"
 
@@ -103,6 +104,20 @@ function App() {
         />
 
         <Route path="*" element={<Navigate to="/" />} />
+
+
+        <Route
+          path="/admin-usuarios"
+          element={
+            <PrivateRoute
+              isLogged={isLogged}
+              user={user}
+              allowedRoles={["ADMIN"]}
+            >
+              <AdminUsuariosPanel />
+            </PrivateRoute>
+          }
+        />
 
       </Routes>
     </div>

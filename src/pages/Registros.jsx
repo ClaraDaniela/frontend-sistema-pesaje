@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
-
 import PesadasTable from "../components/PesadasTable";
 import PesadaDetailModal from "../components/PesadaDetailModal";
 import EditPesadaModal from "../components/EditPesadaModal";
-
+import ResultadoModal from "../components/ResultadoModal";
 import Logo from "../components/Logo";
 
 export default function Registros() {
@@ -36,10 +35,7 @@ export default function Registros() {
 
   const [pesadaView, setPesadaView] = useState(null);
   const [pesadaEdit, setPesadaEdit] = useState(null);
-
-  // =========================
-  // CARGAR PESADAS
-  // =========================
+  const [resultado, setResultado] = useState(null);
 
   const loadPesadas = async (customFilters = filters) => {
 
@@ -69,10 +65,6 @@ export default function Registros() {
 
     }
   };
-
-  // =========================
-  // CARGAR DATOS INICIALES
-  // =========================
 
   const loadAll = async () => {
 
@@ -110,18 +102,17 @@ export default function Registros() {
 
     }
   };
-
-  // =========================
-  // INIT
-  // =========================
-
+  const handlePesadaCerrada = (pesadaActualizada) => {
+    setPesadas((prev) =>
+      prev.map((p) =>
+        p.id === pesadaActualizada.id ? { ...p, ...pesadaActualizada } : p
+      )
+    );
+    setResultado(pesadaActualizada);
+  };
   useEffect(() => {
     loadAll();
   }, []);
-
-  // =========================
-  // FILTROS
-  // =========================
 
   useEffect(() => {
 
@@ -131,30 +122,9 @@ export default function Registros() {
 
   }, [filters]);
 
-  // =========================
-  // CERRAR PESADA
-  // =========================
-
-  const handlePesadaCerrada = (pesadaActualizada) => {
-
-    setPesadas((prev) =>
-      prev.map((p) =>
-        p.id === pesadaActualizada.id
-          ? {
-              ...p,
-              ...pesadaActualizada,
-            }
-          : p
-      )
-    );
-  };
 
   return (
     <div className="container">
-
-      {/* =========================
-           TOPBAR
-      ========================= */}
 
       <div className="topbar">
 
@@ -174,10 +144,6 @@ export default function Registros() {
         </div>
 
       </div>
-
-      {/* =========================
-           TABLA
-      ========================= */}
 
       <section className="section-card">
 
@@ -210,10 +176,6 @@ export default function Registros() {
 
       </section>
 
-      {/* =========================
-           MODAL VER
-      ========================= */}
-
       {pesadaView && (
 
         <PesadaDetailModal
@@ -222,10 +184,6 @@ export default function Registros() {
         />
 
       )}
-
-      {/* =========================
-           MODAL EDITAR
-      ========================= */}
 
       {pesadaEdit && (
 
@@ -241,6 +199,13 @@ export default function Registros() {
           }}
         />
 
+      )}
+
+      {resultado && (
+        <ResultadoModal
+          resultado={resultado}
+          onClose={() => setResultado(null)}
+        />
       )}
 
     </div>

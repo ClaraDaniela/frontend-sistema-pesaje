@@ -2,14 +2,6 @@ import { useEffect, useState, useCallback } from "react";
 import api from "../services/api";
 import CerrarPesadaModal from "./CerrarPesadaModal";
 
-/**
- * PesadasAbiertas
- * Lista todas las pesadas que aún no tienen tara_real_kg (peso de salida).
- * Permite cerrarlas desde esta vista.
- *
- * Props:
- *   balanzaDisponible – bool (default true)
- */
 export default function PesadasAbiertas({ balanzaDisponible = true }) {
   const [pesadas, setPesadas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,14 +26,12 @@ export default function PesadasAbiertas({ balanzaDisponible = true }) {
   }, [cargar]);
 
   const handleCerrada = (pesadaActualizada) => {
-    // Quitar de la lista de abiertas
     setPesadas(prev => prev.filter(p => p.id !== pesadaActualizada.id));
     setPesadaACerrar(null);
     setExito(`Pesada #${pesadaActualizada.id} cerrada correctamente.`);
     setTimeout(() => setExito(null), 4000);
   };
 
-  // Filtro por patente, empresa, material o ID
   const pesadasFiltradas = pesadas.filter(p => {
     const q = busqueda.toLowerCase();
     if (!q) return true;
@@ -65,7 +55,6 @@ export default function PesadasAbiertas({ balanzaDisponible = true }) {
   return (
     <div className="pesadas-abiertas-view">
 
-      {/* Header de la vista */}
       <div className="view-header">
         <div className="view-header-left">
           <div className="section-icon icon-amber">⏳</div>
@@ -83,12 +72,10 @@ export default function PesadasAbiertas({ balanzaDisponible = true }) {
         </button>
       </div>
 
-      {/* Aviso éxito */}
       {exito && (
         <div className="alert-success">{exito}</div>
       )}
 
-      {/* Búsqueda */}
       <div className="search-bar">
         <span className="search-icon">🔍</span>
         <input
@@ -102,7 +89,6 @@ export default function PesadasAbiertas({ balanzaDisponible = true }) {
         )}
       </div>
 
-      {/* Tabla / estado vacío */}
       {loading ? (
         <div className="empty-state">
           <div className="empty-icon">⏳</div>
@@ -173,7 +159,6 @@ export default function PesadasAbiertas({ balanzaDisponible = true }) {
         </div>
       )}
 
-      {/* Modal cierre */}
       {pesadaACerrar && (
         <CerrarPesadaModal
           pesada={pesadaACerrar}

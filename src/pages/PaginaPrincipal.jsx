@@ -1,7 +1,7 @@
 {/*Aca es el componente de la pagina principal, se muestra luego del login, es el menu de seleccion*/}
 
 import { useNavigate } from "react-router-dom";
-import { FaWeightHanging, FaBoxes, FaIndustry, FaSignOutAlt, FaFileAlt } from "react-icons/fa";
+import { FaWeightHanging, FaBoxes, FaIndustry, FaSignOutAlt, FaFileAlt, FaUserFriends } from "react-icons/fa";
 import Logo from "../components/Logo";
 import "../styles/PaginaPrincipal.css";
 
@@ -14,6 +14,7 @@ export default function PaginaPrincipal({ user }) {
     reportes: ["ADMIN", "OPERADOR"].includes(rol),
     inventario: ["ADMIN", "OPERADOR"].includes(rol),
     registros: ["ADMIN", "OPERADOR", "PORTERIA"].includes(rol),
+    adminusuarios: ["ADMIN"].includes(rol),
   };
 
   const handleLogout = () => {
@@ -26,33 +27,38 @@ export default function PaginaPrincipal({ user }) {
     {
       permiso: permisos.pesadas,
       icon: <FaWeightHanging />,
-      label: "Módulo de Creacion de Registro de Pesadas",
+      label: "Creación de registros de entrada/salida",
       to: "/pesadas",
     },
     {
       permiso: permisos.reportes,
       icon: <FaBoxes />,
-      label: "Módulo de Stock",
+      label: "Stock de pesadas e inventario",
       to: "/stock",
     },
     {
       permiso: permisos.inventario,
       icon: <FaIndustry />,
-      label: "Módulo de Reciclabilidad",
+      label: "Reciclabilidad",
       to: "/playa",
     },
     {
       permiso: permisos.registros,
       icon: <FaFileAlt />,
-      label: "Módulo de Registros Históricos de Pesadas",
+      label: "Registros Históricos de Pesadas",
       to: "/registros",
+    },
+    {
+      permiso: permisos.adminusuarios,
+      icon: <FaUserFriends />,
+      label: "Administración de Usuarios",
+      to: "/admin-usuarios",
     },
   ];
 
   return (
     <div className="pagina-principal">
 
-      {/* ===== HEADER ===== */}
       <header className="header">
         <div className="logo-container">
           <Logo />
@@ -71,7 +77,6 @@ export default function PaginaPrincipal({ user }) {
         </div>
       </header>
 
-      {/* ===== MENU ===== */}
       <nav className="menu">
         {menuItems.map((item, idx) => (
           <button

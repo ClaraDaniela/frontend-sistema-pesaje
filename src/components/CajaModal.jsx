@@ -13,9 +13,6 @@ function CajaModal({ onClose, onSaved }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // =========================
-  // CARGAR TIPOS DE CAJA
-  // =========================
   useEffect(() => {
 
     const cargarTipos = async () => {
@@ -35,9 +32,6 @@ function CajaModal({ onClose, onSaved }) {
 
   }, []);
 
-  // =========================
-  // GUARDAR
-  // =========================
   const guardar = async () => {
 
     setError(null);
@@ -87,9 +81,6 @@ function CajaModal({ onClose, onSaved }) {
   return (
     <Modal title="Nueva caja" onClose={onClose}>
 
-      {/* =========================
-          TIPO
-      ========================= */}
       <div className="field-group">
 
         <label>
@@ -118,9 +109,6 @@ function CajaModal({ onClose, onSaved }) {
 
       </div>
 
-      {/* =========================
-          CÓDIGO
-      ========================= */}
       <div
         className="field-group"
         style={{ marginTop: "14px" }}
@@ -139,9 +127,6 @@ function CajaModal({ onClose, onSaved }) {
 
       </div>
 
-      {/* =========================
-          TARA
-      ========================= */}
       <div
         className="field-group"
         style={{ marginTop: "14px" }}
@@ -162,9 +147,6 @@ function CajaModal({ onClose, onSaved }) {
 
       </div>
 
-      {/* =========================
-          ERROR
-      ========================= */}
       {error && (
 
         <div
@@ -179,10 +161,7 @@ function CajaModal({ onClose, onSaved }) {
         </div>
 
       )}
-
-      {/* =========================
-          FOOTER
-      ========================= */}
+      
       <div className="modal-footer">
 
         <button

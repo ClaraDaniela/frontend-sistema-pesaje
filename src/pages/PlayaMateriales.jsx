@@ -1,8 +1,6 @@
-{/*Aca es el componente donde se gestionan los materiales que se descargan, se selecciona la pesada a la que
-   pertenece y se especifica que materiales se descargan*/}
-
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import StockMaterialesDescargas from "../components/StockMaterialesDescarga";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -30,9 +28,8 @@ function ToleranciaTag({ dentro, diferencia }) {
 // ─── fila de material con selects en cascada ────────────────────────────────
 
 function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onEliminar }) {
-  const { tipos, bases, formas, combinaciones } = catalogos;
+  const { tipos, combinaciones } = catalogos;
 
-  // bases filtradas por tipo elegido
   const basesFiltradas = fila.tipo_id
     ? [...new Map(
       combinaciones
@@ -41,7 +38,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
     ).values()]
     : [];
 
-  // formas filtradas por tipo + base
   const formasFiltradas = fila.tipo_id && fila.base_id
     ? [...new Map(
       combinaciones
@@ -54,7 +50,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
     ).values()]
     : [];
 
-  // id final de la combinación elegida
   const comboId = fila.tipo_id && fila.base_id
     ? (combinaciones.find(c =>
       c.tipo_material_id === Number(fila.tipo_id) &&
@@ -63,7 +58,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
     )?.id_materiales_descarga ?? null)
     : null;
 
-  // sincronizar id combo hacia el padre
   useEffect(() => {
     if (fila.material_id !== comboId) {
       onActualizar(index, "material_id", comboId);
@@ -73,11 +67,9 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
 
   const porcentajeNum = Number(fila.porcentaje || 0);
   const pesoNetoNum = Number(pesoNeto || 0);
-
-  const kg =
-    porcentajeNum > 0 && pesoNetoNum > 0
-      ? ((pesoNetoNum * porcentajeNum) / 100).toFixed(2)
-      : "";
+  const kg = porcentajeNum > 0 && pesoNetoNum > 0
+    ? ((pesoNetoNum * porcentajeNum) / 100).toFixed(2)
+    : "";
 
   const sel = {
     padding: "6px 8px",
@@ -91,8 +83,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 90px 80px 32px", gap: 6, alignItems: "center", marginBottom: 6 }}>
-
-      {/* Categoría */}
       <select
         style={sel}
         value={fila.tipo_id}
@@ -106,7 +96,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
         {tipos.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
       </select>
 
-      {/* Base */}
       <select
         style={sel}
         value={fila.base_id}
@@ -120,7 +109,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
         {basesFiltradas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
       </select>
 
-      {/* Forma / variante */}
       <select
         style={sel}
         value={fila.forma_id}
@@ -131,7 +119,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
         {formasFiltradas.map(f => <option key={f.id} value={f.id}>{f.nombre}</option>)}
       </select>
 
-      {/* Porcentaje */}
       <input
         type="number"
         placeholder="%"
@@ -142,7 +129,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
         onChange={e => onActualizar(index, "porcentaje", e.target.value)}
       />
 
-      {/* Kg calculado */}
       <input
         type="text"
         readOnly
@@ -150,7 +136,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
         style={{ ...sel, background: "#f9fafb", color: "#6b7280", textAlign: "right" }}
       />
 
-      {/* Eliminar */}
       <button
         onClick={() => onEliminar(index)}
         style={{ background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: 700, fontSize: 15, padding: "4px 0" }}
@@ -165,26 +150,24 @@ export default function Descarga() {
   const { pesadaId } = useParams();
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState("cargar");
+
   const [pesadas, setPesadas] = useState([]);
   const [pesadaSeleccionada, setPesadaSeleccionada] = useState(pesadaId || "");
   const [pesada, setPesada] = useState(null);
 
-  // catálogo combinado de materiales
   const [catalogos, setCatalogos] = useState({ tipos: [], bases: [], formas: [], combinaciones: [] });
 
-  // filas de materiales
   const [filas, setFilas] = useState([{ tipo_id: "", base_id: "", forma_id: "", porcentaje: "", material_id: null }]);
   const [comentarios, setComentarios] = useState("");
   const [guardando, setGuardando] = useState(false);
 
-  // ── cargar pesadas sin descarga ──
   useEffect(() => {
     fetch("/api/pesadas/sin-descarga")
       .then(r => r.json())
       .then(setPesadas);
   }, []);
 
-  // ── cargar detalle de la pesada elegida ──
   useEffect(() => {
     if (!pesadaSeleccionada) { setPesada(null); return; }
     fetch(`/api/pesadas/${pesadaSeleccionada}`)
@@ -192,30 +175,25 @@ export default function Descarga() {
       .then(setPesada);
   }, [pesadaSeleccionada]);
 
-  // ── cargar catálogos de materiales ──
   useEffect(() => {
     Promise.all([
       fetch("/api/materiales_descarga/tipos").then(r => r.json()),
       fetch("/api/materiales_descarga/combinaciones").then(r => r.json())
     ]).then(([tipos, combinaciones]) => {
-
       const bases = [...new Map(
         combinaciones
           .filter(c => c.material_base_id)
           .map(c => [c.material_base_id, { id: c.material_base_id, nombre: c.base_nombre }])
       ).values()];
-
       const formas = [...new Map(
         combinaciones
           .filter(c => c.forma_material_id)
           .map(c => [c.forma_material_id, { id: c.forma_material_id, nombre: c.forma_nombre }])
       ).values()];
-
       setCatalogos({ tipos, bases, formas, combinaciones });
     });
   }, []);
 
-  // ── actualizar campo de una fila ──
   const actualizarFila = useCallback((index, campo, valor) => {
     setFilas(prev => {
       const nuevas = [...prev];
@@ -229,21 +207,11 @@ export default function Descarga() {
 
   const totalPorcentaje = filas.reduce((acc, f) => acc + Number(f.porcentaje || 0), 0);
 
-  // ── guardar ──
   const guardar = async () => {
     if (!pesadaSeleccionada) return alert("Seleccioná una pesada");
-
-    if (Math.round(totalPorcentaje) !== 100) {
-      return alert("Los porcentajes deben sumar 100%");
-    }
-
-    const filasInvalidas = filas.filter(
-      f => !f.material_id || !f.porcentaje
-    );
-
-    if (filasInvalidas.length) {
-      return alert("Completá todos los materiales y porcentajes");
-    }
+    if (Math.round(totalPorcentaje) !== 100) return alert("Los porcentajes deben sumar 100%");
+    const filasInvalidas = filas.filter(f => !f.material_id || !f.porcentaje);
+    if (filasInvalidas.length) return alert("Completá todos los materiales y porcentajes");
 
     const payload = {
       pesada_id: pesadaSeleccionada,
@@ -255,33 +223,24 @@ export default function Descarga() {
       }))
     };
 
-    console.log(JSON.stringify(payload, null, 2));
-
     setGuardando(true);
-
     try {
       const res = await fetch("/api/descargas", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       if (res.ok) {
         alert("Descarga guardada");
         navigate("/");
       } else {
         const data = await res.json();
-        console.log(data);
         alert(data.error || "Error al guardar");
       }
-
     } finally {
       setGuardando(false);
     }
   };
-  // ─────────────────────────────────────────────────────────────────────────
 
   const card = {
     background: "#fff",
@@ -290,7 +249,6 @@ export default function Descarga() {
     padding: "16px 20px",
     marginBottom: 16,
   };
-
   const label = { fontSize: 12, color: "#6b7280", marginBottom: 2 };
   const value = { fontSize: 14, color: "#111827", fontWeight: 500 };
 
@@ -301,165 +259,181 @@ export default function Descarga() {
     </div>
   );
 
+  const tabBtn = (tab) => ({
+    padding: "8px 18px",
+    borderRadius: 6,
+    border: "1px solid #d1d5db",
+    background: activeTab === tab ? "#1d4ed8" : "#fff",
+    color: activeTab === tab ? "#fff" : "#374151",
+    fontWeight: 500,
+    cursor: "pointer",
+  });
+
   return (
     <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 16px", fontFamily: "sans-serif" }}>
+
       <div className="topbar-right">
-        <button
-          className="btn-secundario"
-          onClick={() => navigate("/")}
-        >
+        <button className="btn-secundario" onClick={() => navigate("/")}>
           ← Inicio
         </button>
       </div>
-      <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 20, color: "#111827" }}>Descarga de materiales</h2>
 
-      {/* ── selector de pesada ── */}
-      {!pesadaId && (
-        <div style={card}>
-          <label style={{ ...label, display: "block", marginBottom: 6 }}>Seleccionar pesada</label>
-          <select
-            value={pesadaSeleccionada}
-            onChange={e => setPesadaSeleccionada(e.target.value)}
-            style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #d1d5db", fontSize: 14 }}
-          >
-            <option value="">— Elegir —</option>
-            {pesadas.map(p => (
-              <option key={p.id} value={p.id}>
-                #{p.id} · {p.empresa} · {p.patente} · {p.personal_nombre} {p.personal_apellido} · {new Date(p.fecha).toLocaleString("es-AR")}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16, color: "#111827" }}>
+        Playa de materiales
+      </h2>
 
-      {/* ── info de la pesada ── */}
-      {pesada && (
-        <div style={card}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 20, marginBottom: 14 }}>
-            <InfoItem l="Empresa" v={pesada.empresa} />
-            <InfoItem l="Chofer" v={`${pesada.personal_nombre} ${pesada.personal_apellido}`} />
-            <InfoItem l="Vehículo" v={pesada.patente} />
-            <InfoItem l="Tipo" v={pesada.tipo_vehiculo} />
-            <InfoItem l="Material" v={pesada.material} />
-            <InfoItem l="Fecha" v={new Date(pesada.fecha).toLocaleString("es-AR")} />
-            <InfoItem l="Movimiento" v={pesada.tipo_movimiento} />
-          </div>
+      {/* ── tabs ── */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        <button onClick={() => setActiveTab("cargar")} style={tabBtn("cargar")}>
+          Cargar descarga
+        </button>
+        <button onClick={() => setActiveTab("stock")} style={tabBtn("stock")}>
+          Stock descarga
+        </button>
+      </div>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 20, marginBottom: 14, paddingTop: 12, borderTop: "1px solid #f3f4f6" }}>
-            <InfoItem l="Peso bruto" v={fmtKg(pesada.peso_bruto_kg)} />
-            <InfoItem l="Tara camión" v={fmtKg(pesada.tara_camion)} />
-            {pesada.tara_caja > 0 && <InfoItem l="Tara caja" v={fmtKg(pesada.tara_caja)} />}
-            <InfoItem l="Peso neto">{
-              <span style={{ color: "#166534", fontWeight: 600 }}>{fmtKg(pesada.peso_neto)}</span>
-            }</InfoItem>
-          </div>
+      {/* ── tab stock ── */}
+      {activeTab === "stock" && <StockMaterialesDescargas />}
 
-          {/* Documentación y tolerancia */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 20, paddingTop: 12, borderTop: "1px solid #f3f4f6" }}>
-            {pesada.nro_manifiesto && <InfoItem l="N° Manifiesto" v={pesada.nro_manifiesto} />}
-            {pesada.nro_remito && <InfoItem l="N° Remito" v={pesada.nro_remito} />}
-            {pesada.peso_declarado_kg && (
-              <InfoItem l="Peso declarado" v={fmtKg(pesada.peso_declarado_kg)} />
-            )}
-            {pesada.dentro_tolerancia != null && (
-              <InfoItem l="Tolerancia (5%)">
-                <ToleranciaTag dentro={pesada.dentro_tolerancia} diferencia={pesada.diferencia_kg} />
-              </InfoItem>
-            )}
-          </div>
-        </div>
-      )}
+      {/* ── tab cargar ── */}
+      {activeTab === "cargar" && (
+        <>
+          {!pesadaId && (
+            <div style={card}>
+              <label style={{ ...label, display: "block", marginBottom: 6 }}>Seleccionar pesada</label>
+              <select
+                value={pesadaSeleccionada}
+                onChange={e => setPesadaSeleccionada(e.target.value)}
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #d1d5db", fontSize: 14 }}
+              >
+                <option value="">— Elegir —</option>
+                {pesadas.map(p => (
+                  <option key={p.id} value={p.id}>
+                    #{p.id} · {p.empresa} · {p.patente} · {p.personal_nombre} {p.personal_apellido} · {new Date(p.fecha).toLocaleString("es-AR")}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-      {/* ── tabla de materiales ── */}
-      {pesada && (
-        <div style={card}>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr 90px 80px 32px",
-            gap: 6,
-            marginBottom: 8,
-            fontSize: 11,
-            fontWeight: 600,
-            color: "#6b7280",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-          }}>
-            <span>Categoría</span>
-            <span>Material</span>
-            <span>Variante</span>
-            <span style={{ textAlign: "right" }}>%</span>
-            <span style={{ textAlign: "right" }}>Kg</span>
-            <span />
-          </div>
+          {pesada && (
+            <div style={card}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 20, marginBottom: 14 }}>
+                <InfoItem l="Empresa" v={pesada.empresa} />
+                <InfoItem l="Chofer" v={`${pesada.personal_nombre} ${pesada.personal_apellido}`} />
+                <InfoItem l="Vehículo" v={pesada.patente} />
+                <InfoItem l="Tipo" v={pesada.tipo_vehiculo} />
+                <InfoItem l="Material" v={pesada.material} />
+                <InfoItem l="Fecha" v={new Date(pesada.fecha).toLocaleString("es-AR")} />
+                <InfoItem l="Movimiento" v={pesada.tipo_movimiento} />
+              </div>
 
-          {filas.map((f, i) => (
-            <FilaMaterial
-              key={i}
-              fila={f}
-              index={i}
-              pesoNeto={
-                pesada.peso_neto_real_kg ??
-                pesada.peso_neto_estimado_kg ??
-                0
-              }
-              catalogos={catalogos}
-              onActualizar={actualizarFila}
-              onEliminar={eliminarFila}
-            />
-          ))}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 20, marginBottom: 14, paddingTop: 12, borderTop: "1px solid #f3f4f6" }}>
+                <InfoItem l="Peso bruto" v={fmtKg(pesada.peso_bruto_kg)} />
+                <InfoItem l="Tara camión" v={fmtKg(pesada.tara_camion)} />
+                {pesada.tara_caja > 0 && <InfoItem l="Tara caja" v={fmtKg(pesada.tara_caja)} />}
+                <InfoItem l="Peso neto">
+                  <span style={{ color: "#166534", fontWeight: 600 }}>{fmtKg(pesada.peso_neto)}</span>
+                </InfoItem>
+              </div>
 
-          {/* total */}
-          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 12, marginTop: 8, paddingTop: 8, borderTop: "1px solid #f3f4f6" }}>
-            <span style={{ fontSize: 13, color: "#6b7280" }}>Total:</span>
-            <span style={{
-              fontWeight: 700,
-              fontSize: 14,
-              color: Math.round(totalPorcentaje) === 100 ? "#166534" : "#991b1b",
-            }}>
-              {totalPorcentaje.toFixed(1)}%
-            </span>
-          </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 20, paddingTop: 12, borderTop: "1px solid #f3f4f6" }}>
+                {pesada.nro_manifiesto && <InfoItem l="N° Manifiesto" v={pesada.nro_manifiesto} />}
+                {pesada.nro_remito && <InfoItem l="N° Remito" v={pesada.nro_remito} />}
+                {pesada.peso_declarado_kg && <InfoItem l="Peso declarado" v={fmtKg(pesada.peso_declarado_kg)} />}
+                {pesada.dentro_tolerancia != null && (
+                  <InfoItem l="Tolerancia (5%)">
+                    <ToleranciaTag dentro={pesada.dentro_tolerancia} diferencia={pesada.diferencia_kg} />
+                  </InfoItem>
+                )}
+              </div>
+            </div>
+          )}
 
-          <button
-            onClick={agregarFila}
-            style={{ marginTop: 12, background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontSize: 13 }}
-          >
-            + Agregar material
-          </button>
-        </div>
-      )}
+          {pesada && (
+            <div style={card}>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr 1fr 90px 80px 32px",
+                gap: 6,
+                marginBottom: 8,
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#6b7280",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}>
+                <span>Categoría</span>
+                <span>Material</span>
+                <span>Variante</span>
+                <span style={{ textAlign: "right" }}>%</span>
+                <span style={{ textAlign: "right" }}>Kg</span>
+                <span />
+              </div>
 
-      {/* ── comentarios y guardar ── */}
-      {pesada && (
-        <div style={card}>
-          <label style={{ ...label, display: "block", marginBottom: 6 }}>Comentarios</label>
-          <textarea
-            value={comentarios}
-            onChange={e => setComentarios(e.target.value)}
-            rows={3}
-            style={{ width: "100%", borderRadius: 6, border: "1px solid #d1d5db", padding: "8px 10px", fontSize: 14, resize: "vertical", boxSizing: "border-box" }}
-            placeholder="Observaciones de la descarga..."
-          />
+              {filas.map((f, i) => (
+                <FilaMaterial
+                  key={i}
+                  fila={f}
+                  index={i}
+                  pesoNeto={pesada.peso_neto_real_kg ?? pesada.peso_neto_estimado_kg ?? 0}
+                  catalogos={catalogos}
+                  onActualizar={actualizarFila}
+                  onEliminar={eliminarFila}
+                />
+              ))}
 
-          <button
-            onClick={guardar}
-            disabled={guardando}
-            style={{
-              marginTop: 14,
-              background: guardando ? "#9ca3af" : "#1d4ed8",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              padding: "10px 28px",
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: guardando ? "default" : "pointer",
-              width: "100%",
-            }}
-          >
-            {guardando ? "Guardando..." : "Guardar descarga"}
-          </button>
-        </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 12, marginTop: 8, paddingTop: 8, borderTop: "1px solid #f3f4f6" }}>
+                <span style={{ fontSize: 13, color: "#6b7280" }}>Total:</span>
+                <span style={{
+                  fontWeight: 700,
+                  fontSize: 14,
+                  color: Math.round(totalPorcentaje) === 100 ? "#166534" : "#991b1b",
+                }}>
+                  {totalPorcentaje.toFixed(1)}%
+                </span>
+              </div>
+
+              <button
+                onClick={agregarFila}
+                style={{ marginTop: 12, background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontSize: 13 }}
+              >
+                + Agregar material
+              </button>
+            </div>
+          )}
+
+          {pesada && (
+            <div style={card}>
+              <label style={{ ...label, display: "block", marginBottom: 6 }}>Comentarios</label>
+              <textarea
+                value={comentarios}
+                onChange={e => setComentarios(e.target.value)}
+                rows={3}
+                style={{ width: "100%", borderRadius: 6, border: "1px solid #d1d5db", padding: "8px 10px", fontSize: 14, resize: "vertical", boxSizing: "border-box" }}
+                placeholder="Observaciones de la descarga..."
+              />
+              <button
+                onClick={guardar}
+                disabled={guardando}
+                style={{
+                  marginTop: 14,
+                  background: guardando ? "#9ca3af" : "#1d4ed8",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "10px 28px",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  cursor: guardando ? "default" : "pointer",
+                  width: "100%",
+                }}
+              >
+                {guardando ? "Guardando..." : "Guardar descarga"}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
