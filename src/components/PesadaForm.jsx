@@ -147,10 +147,13 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
   const submit = async e => {
     e.preventDefault();
 
+    const materialSeleccionado = materiales.find(m => m.id === Number(form.material_general_id));
+    const esVacio = materialSeleccionado?.nombre === "VACIO";
+
     if (form.origen === "MANUAL") {
       if (!passwordManual.trim()) return alert("Debe ingresar contraseña.");
       if (!motivoManual.trim()) return alert("Debe ingresar el motivo.");
-      if (!form.peso) return alert("Debe ingresar el peso.");
+      if (!form.peso && !esVacio) return alert("Debe ingresar el peso.");
     }
 
     try {
@@ -177,14 +180,17 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
       const p = detalle.data;
 
       const tienePesoDeclarado = p.peso_declarado_kg != null && Number(p.peso_declarado_kg) > 0;
+      const esVacioBackend = p.material === "VACIO" && Number(p.peso_bruto_kg) === 0;
 
       setResultado({
-        tipo: tienePesoDeclarado ? (p.dentro_tolerancia ? "ok" : "warning") : "ok",
-        mensaje: tienePesoDeclarado
-          ? (p.dentro_tolerancia
-            ? "✔ Pesada guardada correctamente (dentro de tolerancia)"
-            : "Pesada guardada, pero FUERA de tolerancia")
-          : "Pesada guardada correctamente",
+        tipo: esVacioBackend || !tienePesoDeclarado || p.dentro_tolerancia ? "ok" : "warning",
+        mensaje: esVacioBackend
+          ? "Vehículo vacío registrado y cerrado automáticamente"
+          : tienePesoDeclarado
+            ? (p.dentro_tolerancia
+              ? "✔ Pesada guardada correctamente (dentro de tolerancia)"
+              : "Pesada guardada, pero FUERA de tolerancia")
+            : "Pesada guardada correctamente",
         id: p.id
       });
 
