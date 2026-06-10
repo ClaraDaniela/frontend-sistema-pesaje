@@ -209,7 +209,8 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
         peso_declarado_kg: "",
         tara_real_kg: ""
       });
-
+      
+      setTipoCajaSeleccionado(null);
       setPasswordManual("");
       setMotivoManual("");
 
@@ -570,7 +571,7 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
             onClose={() => setShowMaterial(false)}
             onSaved={m => {
               setMateriales(p => [...p, m]);
-              setForm(f => ({ ...f, material_general_id: m.id }));
+              setForm(f => ({ ...f, material_general_id: Number(m.id) }));
             }}
           />
         )}
