@@ -178,7 +178,7 @@ export default function StockMaterialesGenerales() {
                 <tr key={item.material_id}>
 
                   <td>
-                    {item.material}
+                    {item.material || "N/A"}
                   </td>
 
                   <td

@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContaine
 export default function PesadasChart({ stock }) {
   // Convertir stock a formato para gráfico
   const data = (stock || []).map((item) => ({
-    material: item.nombre || "Sin material",
+    material: item.material || item.nombre || "N/A",
     cantidad: Number(item.stock_total) || 0,
   }));
 
@@ -12,7 +12,7 @@ export default function PesadasChart({ stock }) {
       <ResponsiveContainer>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="material" />
+          <XAxis dataKey="material" hide />
           <YAxis />
           <Tooltip />
           <Bar dataKey="cantidad" fill="#8884d8" />

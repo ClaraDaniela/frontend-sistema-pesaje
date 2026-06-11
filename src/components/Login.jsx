@@ -2,8 +2,8 @@ import "../styles/login.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import Logo from "./Logo";
-//el fondo lo uso en el css como background
-import fondo from "../../public/fondooperarios.jpg";
+import api from "../services/api";
+
 function Login({ setIsLogged, setUser }) {
 
   const [usuario, setUsuario] = useState("");
@@ -19,34 +19,30 @@ function Login({ setIsLogged, setUser }) {
     setError(null);
 
     try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          username: usuario,
-          password: password
-        })
+      const response = await api.post("/login", {
+        username: usuario.trim(),
+        password,
       });
 
-      if (!response.ok) {
-        throw new Error("Usuario o contraseña incorrectos");
+      const data = response.data;
+
+      if (!data) {
+        throw new Error("No se recibieron datos del usuario");
       }
-
-      const data = await response.json();
-      console.log("ROL EN FRONTEND:", JSON.stringify(data.rol)); 
-
 
       setIsLogged(true);
       setUser(data);
-
       localStorage.setItem("user", JSON.stringify(data));
 
-      navigate("/");
-
+      navigate("/", { replace: true });
     } catch (err) {
-      setError(err.message);
+      const message =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        "No se pudo iniciar sesión";
+
+      setError(message);
     }
   };
 

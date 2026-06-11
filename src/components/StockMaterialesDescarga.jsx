@@ -9,12 +9,18 @@ export default function StockMaterialesDescarga() {
 
   const [loading, setLoading] = useState(false);
 
-  const nombreMaterial = (item) =>
-    `${item.categoria} / ${item.material_base}${
-      item.forma ? " / " + item.forma : ""
-    }${
-      item.estado ? " / " + item.estado : ""
-    }`;
+  const nombreMaterial = (item) => {
+    const categoria = item.categoria || 'N/A';
+    const materialBase = item.material_base || 'N/A';
+    let name = `${categoria} / ${materialBase}`;
+    if (item.forma) {
+      name += ` / ${item.forma}`;
+    }
+    if (item.estado) {
+      name += ` / ${item.estado}`;
+    }
+    return name;
+  };
 
   const loadStock = async () => {
 
@@ -165,7 +171,10 @@ export default function StockMaterialesDescarga() {
 
         </div>
 
-        <PesadasChart stock={stock} />
+        <PesadasChart stock={stock.map(item => ({
+          ...item,
+          nombre: nombreMaterial(item)
+        }))} />
 
       </section>
 

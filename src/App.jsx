@@ -21,18 +21,30 @@ function PrivateRoute({ isLogged, allowedRoles, user, children }) {
 
   return children;
 }
+
+function readStoredUser() {
+  try {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  } catch (error) {
+    localStorage.removeItem("user");
+    return null;
+  }
+}
+
 function App() {
-  const [isLogged, setIsLogged] = useState(false);
-  const [user, setUser] = useState(null);
+  const [isLogged, setIsLogged] = useState(Boolean(readStoredUser()));
+  const [user, setUser] = useState(readStoredUser);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
+    const savedUser = readStoredUser();
+
     if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUser(parsedUser);
+      setUser(savedUser);
       setIsLogged(true);
     }
+
     setLoading(false);
   }, []);
 
@@ -100,7 +112,15 @@ function App() {
 
         <Route
           path="/playa"
-          element={<PlayaMateriales />}
+          element={
+            <PrivateRoute
+              isLogged={isLogged}
+              user={user}
+              allowedRoles={['ADMIN', 'OPERADOR']}
+            >
+              <PlayaMateriales />
+            </PrivateRoute>
+          }
         />
 
         <Route path="*" element={<Navigate to="/" />} />
