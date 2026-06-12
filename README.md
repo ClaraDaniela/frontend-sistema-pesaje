@@ -68,4 +68,4 @@ Este es el frontend del Sistema de Gestión de Pesaje e Inventario para Servieco
 - **v1.1.0**: Se unificó el formato de nombres de materiales en gráficos y tablas. Se ocultaron las etiquetas del eje X en los gráficos para mejorar la legibilidad.
 
 ---
-© 2024 Servieco - Sistema de Gestión de Pesaje.
+© 2026 Servieco - Sistema de Gestión de Pesaje.

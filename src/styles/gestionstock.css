@@ -363,3 +363,72 @@ body {
   justify-content: flex-end;
   margin-bottom: 20px;
 }
+
+/* ===============================
+   STATS GRID (KPIs)
+   =============================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-left: 4px solid var(--azul-corp);
+}
+
+.stat-box.stat-ok {
+  border-left-color: var(--verde-corp);
+}
+
+.stat-box.stat-bad {
+  border-left-color: #c0392b;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--azul-corp);
+}
+
+/* ===============================
+   STOCK BADGES
+   =============================== */
+.stock-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.badge-ok {
+  background: #e6f4ea;
+  color: var(--verde-corp);
+}
+
+.badge-bad {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.badge-neutral {
+  background: #f0f0f0;
+  color: #888;
+}

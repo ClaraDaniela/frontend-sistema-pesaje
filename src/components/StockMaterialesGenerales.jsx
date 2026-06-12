@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import PesadasChart from "./PesadasChart";
-import {Download} from "lucide-react";
+import { Download, ChartNoAxesCombined } from "lucide-react";
 
 export default function StockMaterialesGenerales() {
 
@@ -35,6 +35,23 @@ export default function StockMaterialesGenerales() {
 
   useEffect(() => {
     loadStock();
+  }, []);
+
+  const [kpis, setKpis] = useState({ total_ingreso: 0, total_egreso: 0 });
+
+  const loadKpis = async () => {
+    try {
+      const res = await api.get("/stock/totales");
+      setKpis(res.data || { total_ingreso: 0, total_egreso: 0 });
+    } catch (error) {
+      console.error("Error cargando KPIs:", error);
+      setKpis({ total_ingreso: 0, total_egreso: 0 });
+    }
+  };
+
+  useEffect(() => {
+    loadStock();
+    loadKpis();
   }, []);
 
   const descargarExcel = async () => {
@@ -81,8 +98,46 @@ export default function StockMaterialesGenerales() {
     0
   );
 
+  const positivos = stock.filter(
+    (i) => Number(i.stock_total) > 0
+  ).length;
+
+  const negativos = stock.filter(
+    (i) => Number(i.stock_total) < 0
+  ).length;
+
   return (
     <div>
+
+      {/* TARJETAS RESUMEN */}
+      <div className="stats-grid">
+
+        <div className="stat-box">
+          <span className="stat-label">Total sistema</span>
+          <span className="stat-value">
+            {totalKg.toLocaleString()} kg
+          </span>
+        </div>
+
+        <div className="stat-box">
+          <span className="stat-label">Materiales</span>
+          <span className="stat-value">{stock.length}</span>
+        </div>
+        <div className="stat-box stat-ok">
+          <span className="stat-label">Total ingresado</span>
+          <span className="stat-value">
+            {Number(kpis.total_ingreso).toLocaleString()} kg
+          </span>
+        </div>
+
+        <div className="stat-box stat-bad">
+          <span className="stat-label">Total egresado</span>
+          <span className="stat-value">
+            {Number(kpis.total_egreso).toLocaleString()} kg
+          </span>
+        </div>
+
+      </div>
 
       {/* GRAFICO */}
       <section className="chart-card">
@@ -103,8 +158,12 @@ export default function StockMaterialesGenerales() {
             <h2
               style={{
                 margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
               }}
             >
+              <ChartNoAxesCombined size={20} />
               Resumen materiales generales
             </h2>
 
@@ -112,6 +171,7 @@ export default function StockMaterialesGenerales() {
               style={{
                 margin: 0,
                 color: "#666",
+                marginTop: "4px",
               }}
             >
               Total sistema:{" "}
@@ -131,7 +191,7 @@ export default function StockMaterialesGenerales() {
 
             <button
               className="btn-secundario"
-              onClick={loadStock}
+              onClick={() => { loadStock(); loadKpis(); }}
             >
               Actualizar
             </button>
@@ -181,20 +241,19 @@ export default function StockMaterialesGenerales() {
                     {item.material || "N/A"}
                   </td>
 
-                  <td
-                    style={{
-                      fontWeight: "bold",
-                      color:
-                        Number(item.stock_total) > 0
-                          ? "green"
-                          : Number(item.stock_total) < 0
-                          ? "red"
-                          : "gray",
-                    }}
-                  >
-                    {Number(
-                      item.stock_total || 0
-                    ).toLocaleString()}
+                  <td>
+                    <span
+                      className={`stock-badge ${Number(item.stock_total) > 0
+                        ? "badge-ok"
+                        : Number(item.stock_total) < 0
+                          ? "badge-bad"
+                          : "badge-neutral"
+                        }`}
+                    >
+                      {Number(
+                        item.stock_total || 0
+                      ).toLocaleString()} kg
+                    </span>
                   </td>
 
                 </tr>
