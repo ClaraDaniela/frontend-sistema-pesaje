@@ -189,7 +189,7 @@ export default function EditPesadaModal({
             value={String(form.empresa_id || "")}
             onChange={handleChange}
           >
-            <option value="">Empresa</option>
+            <option value="" disabled hidden>Empresa</option>
             {empresasActivas.map((e) => (
               <option key={e.id} value={String(e.id)}>
                 {e.nombre}
@@ -202,7 +202,7 @@ export default function EditPesadaModal({
             value={String(form.personal_id || "")}
             onChange={handleChange}
           >
-            <option value="">Chofer</option>
+            <option value="" disabled hidden>Chofer</option>
             {personalActivo.map((p) => (
               <option key={p.id} value={String(p.id)}>
                 {p.nombre} {p.apellido}
@@ -215,7 +215,7 @@ export default function EditPesadaModal({
             value={form.material_general_id}
             onChange={handleChange}
           >
-            <option value="">Material</option>
+            <option value="" disabled hidden>Material</option>
             {materiales.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.nombre}
@@ -228,7 +228,7 @@ export default function EditPesadaModal({
             value={form.tipo_vehiculo_id}
             onChange={handleChange}
           >
-            <option value="">Tipo vehículo</option>
+            <option value="" disabled hidden>Tipo vehículo</option>
             {tiposVehiculo.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.nombre}
@@ -242,7 +242,7 @@ export default function EditPesadaModal({
             onChange={handleChange}
             disabled={!form.tipo_vehiculo_id}
           >
-            <option value="">
+            <option value="" disabled hidden>
               {form.tipo_vehiculo_id ? "Vehículo" : "Seleccioná un tipo primero"}
             </option>
             {vehiculos.map((v) => (
@@ -258,7 +258,7 @@ export default function EditPesadaModal({
               value={form.caja_id}
               onChange={handleChange}
             >
-              <option value="">Caja</option>
+              <option value="" disabled hidden>Caja</option>
               {cajas.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.codigo}

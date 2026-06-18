@@ -16,9 +16,8 @@ export default function ResultadoModal({ resultado, onClose }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div
-        onClick={(e) => e.stopPropagation()}
         style={{
           width: "380px",
           padding: "30px",

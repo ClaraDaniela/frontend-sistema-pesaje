@@ -92,7 +92,7 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
           onActualizar(index, "forma_id", "");
         }}
       >
-        <option value="">Categoría</option>
+        <option value="" disabled hidden>Seleccionar Tipo de material</option>
         {tipos.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
       </select>
 
@@ -105,7 +105,7 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
           onActualizar(index, "forma_id", "");
         }}
       >
-        <option value="">Material</option>
+        <option value="" disabled hidden>Seleccionar Material base</option>
         {basesFiltradas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
       </select>
 
@@ -115,7 +115,7 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
         disabled={!fila.base_id || formasFiltradas.length === 0}
         onChange={e => onActualizar(index, "forma_id", e.target.value)}
       >
-        <option value="">Variante</option>
+        <option value="" disabled hidden>Seleccionar variante</option>
         {formasFiltradas.map(f => <option key={f.id} value={f.id}>{f.nombre}</option>)}
       </select>
 
@@ -306,7 +306,7 @@ export default function Descarga() {
                 onChange={e => setPesadaSeleccionada(e.target.value)}
                 style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #d1d5db", fontSize: 14 }}
               >
-                <option value="">— Elegir —</option>
+                <option value="" disabled hidden>— Elegir —</option>
                 {pesadas.map(p => (
                   <option key={p.id} value={p.id}>
                     #{p.id} · {p.empresa} · {p.patente} · {p.personal_nombre} {p.personal_apellido} · {new Date(p.fecha).toLocaleString("es-AR")}
@@ -332,8 +332,8 @@ export default function Descarga() {
                 <InfoItem l="Peso bruto" v={fmtKg(pesada.peso_bruto_kg)} />
                 <InfoItem l="Tara camión" v={fmtKg(pesada.tara_camion)} />
                 {pesada.tara_caja > 0 && <InfoItem l="Tara caja" v={fmtKg(pesada.tara_caja)} />}
-                <InfoItem l="Peso neto">
-                  <span style={{ color: "#166534", fontWeight: 600 }}>{fmtKg(pesada.peso_neto)}</span>
+                <InfoItem l="Peso neto" v={fmtKg(pesada.peso_neto_real_kg ?? pesada.peso_neto_estimado_kg)}>
+                  <span style={{ color: "#166534", fontWeight: 600 }}>{fmtKg(pesada.peso_neto_real_kg ?? pesada.peso_neto_estimado_kg)}</span>
                 </InfoItem>
               </div>
 
@@ -363,9 +363,9 @@ export default function Descarga() {
                 textTransform: "uppercase",
                 letterSpacing: "0.05em",
               }}>
-                <span>Categoría</span>
-                <span>Material</span>
-                <span>Variante</span>
+                <span>Material base</span>
+                <span>Tipo de material</span>
+                <span>Forma del material</span>
                 <span style={{ textAlign: "right" }}>%</span>
                 <span style={{ textAlign: "right" }}>Kg</span>
                 <span />

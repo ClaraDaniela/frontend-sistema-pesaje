@@ -13,7 +13,7 @@ export default function SelectWithAdd({
 
       <div className="select-add">
         <select value={value || ""} onChange={onChange} required={required}>
-          <option value="">Seleccionar</option>
+          <option value="" disabled hidden>Seleccionar</option>
           {options.map(o => (
             <option key={o.id} value={o.id}>
               {getLabel(o)}

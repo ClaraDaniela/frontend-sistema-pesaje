@@ -159,11 +159,10 @@ export default function CerrarPesadaModal({ pesada, balanzaDisponible = true, on
   return (
     <div
       className="modal-overlay"
-      onClick={onClose}
+      // Se elimina el onClick para evitar cierres accidentales al hacer clic fuera
     >
       <div
         className="modal-card cerrar-pesada-modal"
-        onClick={(e) => e.stopPropagation()}
       >
 
 
@@ -324,7 +323,6 @@ export default function CerrarPesadaModal({ pesada, balanzaDisponible = true, on
                 onChange={(e) =>
                   setPasswordManual(e.target.value)
                 }
-                onClick={(e) => e.stopPropagation()}
               />
 
             </div>
@@ -343,7 +341,6 @@ export default function CerrarPesadaModal({ pesada, balanzaDisponible = true, on
                 onChange={(e) =>
                   setPesoManual(e.target.value)
                 }
-                onClick={(e) => e.stopPropagation()}
               />
 
             </div>
@@ -359,7 +356,6 @@ export default function CerrarPesadaModal({ pesada, balanzaDisponible = true, on
                 onChange={(e) =>
                   setMotivoManual(e.target.value)
                 }
-                onClick={(e) => e.stopPropagation()}
               />
 
             </div>
