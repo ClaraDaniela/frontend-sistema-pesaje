@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import StockMaterialesDescargas from "../components/StockMaterialesDescarga";
+import ReciclabilidadTable from "../components/ReciclabilidadTable";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -25,7 +26,6 @@ function ToleranciaTag({ dentro, diferencia }) {
   );
 }
 
-// ─── fila de material con selects en cascada ────────────────────────────────
 
 function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onEliminar }) {
   const { tipos, combinaciones } = catalogos;
@@ -290,10 +290,16 @@ export default function Descarga() {
         <button onClick={() => setActiveTab("stock")} style={tabBtn("stock")}>
           Stock descarga
         </button>
+        <button onClick={() => setActiveTab("reciclabilidad")} style={tabBtn("reciclabilidad")}>
+          Registros de descarga
+        </button>
       </div>
 
       {/* ── tab stock ── */}
       {activeTab === "stock" && <StockMaterialesDescargas />}
+
+      {/* ── tab reciclabilidad ── */}
+      {activeTab === "reciclabilidad" && <ReciclabilidadTable />}
 
       {/* ── tab cargar ── */}
       {activeTab === "cargar" && (
