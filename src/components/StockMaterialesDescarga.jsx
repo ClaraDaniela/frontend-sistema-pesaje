@@ -16,9 +16,6 @@ export default function StockMaterialesDescarga() {
     if (item.forma) {
       name += ` / ${item.forma}`;
     }
-    if (item.estado) {
-      name += ` / ${item.estado}`;
-    }
     return name;
   };
 

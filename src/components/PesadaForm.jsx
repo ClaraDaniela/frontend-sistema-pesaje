@@ -209,7 +209,7 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
         peso_declarado_kg: "",
         tara_real_kg: ""
       });
-      
+
       setTipoCajaSeleccionado(null);
       setPasswordManual("");
       setMotivoManual("");
@@ -413,11 +413,8 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               <input
                 value={form.nro_manifiesto}
                 onChange={e => setForm(f => ({ ...f, nro_manifiesto: e.target.value }))}
-                placeholder="Opcional"
+                placeholder="OPCIONAL"
               />
-              <small className="field-help">
-
-              </small>
             </div>
 
             <div className="field-group">
@@ -425,11 +422,8 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
               <input
                 value={form.nro_remito}
                 onChange={e => setForm(f => ({ ...f, nro_remito: e.target.value }))}
-                placeholder="Opcional"
+                placeholder="OPCIONAL"
               />
-              <small className="field-help">
-
-              </small>
             </div>
 
             <div className="field-group">
@@ -438,11 +432,8 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
                 type="number"
                 value={form.peso_declarado_kg}
                 onChange={e => setForm(f => ({ ...f, peso_declarado_kg: e.target.value }))}
-                placeholder="Opcional"
+                placeholder="OPCIONAL"
               />
-              <small className="field-help">
-
-              </small>
             </div>
 
             <div className="field-group">
@@ -451,11 +442,11 @@ export default function PesadaForm({ balanzaDisponible = true, onCreated }) {
                 type="number"
                 value={form.tara_real_kg}
                 onChange={e => setForm(f => ({ ...f, tara_real_kg: e.target.value }))}
-                placeholder="Peso real del vehículo vacío"
+                placeholder="OPCIONAL"
               />
-              <small className="field-help">
-                Si se informa la tara real, la pesada se cerrará automáticamente.
-              </small>
+            </div>
+            <div className="manual-note">
+              ⚠ Es importante la carga de documentación, por favor, si el viaje tiene manifiesto, remito o peso declarado, colocalos, sino, dejalos vacios.
             </div>
 
           </div>

@@ -207,14 +207,62 @@ textarea:focus {
 }
 
 /* ===============================
-   RESPONSIVE
+   RESPONSIVE MOBILE
 =============================== */
 @media (max-width: 600px) {
-    .fila {
+
+    .descarga-container {
+        padding: 14px;
+        margin: 0 8px;
+    }
+
+    .info {
         grid-template-columns: 1fr;
     }
 
+    .fila {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 10px;
+        border: 1px solid var(--gris-borde);
+        border-radius: 10px;
+        margin-bottom: 12px;
+    }
+
+    /* Ocultar encabezado de columnas */
+    .fila-header {
+        display: none;
+    }
+
+    .fila select,
+    .fila input {
+        width: 100%;
+        min-height: 44px;
+        font-size: 14px;
+    }
+
+    .fila button {
+        width: 100%;
+        min-height: 44px;
+        font-size: 14px;
+    }
+
+    .fila-add {
+        grid-template-columns: 1fr;
+    }
+
+    .fila-add .btn-add {
+        width: 100%;
+        text-align: center;
+        min-height: 44px;
+    }
+
     .btn-save {
-        font-size: 13px;
+        min-height: 48px;
+        font-size: 15px;
+    }
+
+    textarea {
+        font-size: 14px;
     }
 }
