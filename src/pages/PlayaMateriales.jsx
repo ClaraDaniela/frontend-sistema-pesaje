@@ -62,7 +62,6 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
     if (fila.material_id !== comboId) {
       onActualizar(index, "material_id", comboId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [comboId]);
 
   const porcentajeNum = Number(fila.porcentaje || 0);
@@ -162,6 +161,8 @@ export default function Descarga() {
   const [comentarios, setComentarios] = useState("");
   const [guardando, setGuardando] = useState(false);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   useEffect(() => {
     fetch("/api/pesadas/sin-descarga")
       .then(r => r.json())
@@ -216,6 +217,7 @@ export default function Descarga() {
     const payload = {
       pesada_id: pesadaSeleccionada,
       responsable: 1,
+      usuario_id: user?.id ?? null, 
       comentarios,
       materiales: filas.map(f => ({
         material_id: Number(f.material_id),

@@ -159,7 +159,6 @@ export default function CerrarPesadaModal({ pesada, balanzaDisponible = true, on
   return (
     <div
       className="modal-overlay"
-      // Se elimina el onClick para evitar cierres accidentales al hacer clic fuera
     >
       <div
         className="modal-card cerrar-pesada-modal"

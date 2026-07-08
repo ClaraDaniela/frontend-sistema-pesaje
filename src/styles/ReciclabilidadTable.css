@@ -4,7 +4,6 @@
   border-radius: 10px;
   padding: 16px 20px;
   margin-bottom: 16px;
-  overflow-x: auto; /* Para desplazamiento horizontal en pantallas pequeñas */
 }
 
 .reciclabilidad-title {
@@ -16,14 +15,13 @@
 
 .reciclabilidad-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
+  font-size: 11px;
 }
 
 .reciclabilidad-table th,
 .reciclabilidad-table td {
   border: 1px solid #e5e7eb;
-  padding: 8px 12px;
+  padding: 6px 8px;
   text-align: left;
   vertical-align: top;
 }
@@ -32,7 +30,7 @@
   background-color: #f9fafb;
   font-weight: 600;
   color: #374151;
-  white-space: nowrap; /* Evita que el texto del encabezado se envuelva */
+  white-space: normal;
 }
 
 .reciclabilidad-table tbody tr:nth-child(even) {

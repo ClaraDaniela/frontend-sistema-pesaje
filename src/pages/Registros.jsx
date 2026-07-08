@@ -113,6 +113,15 @@ export default function Registros() {
   useEffect(() => {
     loadAll();
   }, []);
+  
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/pesadas/${id}`, { data: { usuario_id: null } });
+      setPesadas((prev) => prev.filter((p) => p.id !== id));
+    } catch (error) {
+      console.error("Error eliminando pesada:", error);
+    }
+  };
 
   useEffect(() => {
 
@@ -168,6 +177,7 @@ export default function Registros() {
 
             onView={setPesadaView}
             onEdit={setPesadaEdit}
+            onDelete={handleDelete}
 
             onPesadaCerrada={handlePesadaCerrada}
           />

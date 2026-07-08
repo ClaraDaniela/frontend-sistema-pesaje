@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, Printer, Pencil, CheckCircle, Clock, Zap, Search } from "lucide-react";
+import { Eye, Printer, Pencil, CheckCircle, Clock, Zap, Search, Trash2 } from "lucide-react";
 import Select from "react-select";
 import "../styles/tablafiltros.css";
 import "../styles/PesadaTable.css";
@@ -10,6 +10,7 @@ export default function PesadasTable({
   filtros = {},
   onFiltrosChange,
   onSearch,
+  onDelete,
   empresas = [],
   vehiculos = [],
   tipoVehiculo = [],
@@ -20,6 +21,8 @@ export default function PesadasTable({
 }) {
   const [pesadaACerrar, setPesadaACerrar] = useState(null);
   const [exito, setExito] = useState(null);
+
+  const [pesadaAEliminar, setPesadaAEliminar] = useState(null);
 
   const empresaOptions = empresas.map((e) => ({ value: e.id, label: e.nombre }));
   const tipoVehiculoOptions = tipoVehiculo.map((t) => ({ value: t.id, label: t.nombre }));
@@ -46,6 +49,18 @@ export default function PesadasTable({
       tipo_vehiculo_id: "",
       vehiculo_id: "",
     });
+  };
+
+  const handleEliminar = (p) => {
+    if (pesadaAEliminar?.id === p.id) {
+      // segunda vez que clickea = confirma
+      if (onDelete) onDelete(p.id);
+      setPesadaAEliminar(null);
+    } else {
+      // primera vez = pide confirmación
+      setPesadaAEliminar(p);
+      setTimeout(() => setPesadaAEliminar(null), 4000); // se cancela solo
+    }
   };
 
   return (
@@ -186,10 +201,10 @@ export default function PesadasTable({
                   p.estado === "ABIERTA"
                     ? "row-abierta"
                     : p.estado === "CERRADA"
-                    ? "row-cerrada"
-                    : p.estado === "CERRADA_AUTOMATICA"
-                    ? "row-auto"
-                    : ""
+                      ? "row-cerrada"
+                      : p.estado === "CERRADA_AUTOMATICA"
+                        ? "row-auto"
+                        : ""
                 }
               >
                 <td data-label="Fecha">{new Date(p.fecha).toLocaleString("es-AR")}</td>
@@ -242,6 +257,15 @@ export default function PesadasTable({
                         title="Cerrar pesada (registrar peso de salida)"
                       >
                         X
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button
+                        className={pesadaAEliminar?.id === p.id ? "btn-accion-eliminar confirming" : "btn-accion-eliminar"}
+                        onClick={() => handleEliminar(p)}
+                        title={pesadaAEliminar?.id === p.id ? "¿Confirmar eliminación?" : "Eliminar pesada"}
+                      >
+                        {pesadaAEliminar?.id === p.id ? "¿Seguro?" : <Trash2 size={16} />}
                       </button>
                     )}
                   </div>

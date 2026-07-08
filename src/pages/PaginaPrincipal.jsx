@@ -13,7 +13,7 @@ export default function PaginaPrincipal({ user }) {
     pesadas: ["ADMIN", "PORTERIA"].includes(rol),
     reportes: ["ADMIN", "OPERADOR"].includes(rol),
     inventario: ["ADMIN", "OPERADOR"].includes(rol),
-    registros: ["ADMIN", "OPERADOR", "PORTERIA"].includes(rol),
+    registros: ["ADMIN", "PORTERIA", "OPERADOR"].includes(rol),
     adminusuarios: ["ADMIN"].includes(rol),
   };
 

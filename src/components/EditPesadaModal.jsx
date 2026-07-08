@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import "../styles/ModalEditar.css";
 
-// Tipos que habilitan selector de caja
+// Tipos que habilitan selector de caja, si ya se, esta mal hardcodear
 const TIPOS_CON_CAJA = ["ROLL OFF", "SEMI"];
 
 export default function EditPesadaModal({
@@ -27,6 +27,8 @@ export default function EditPesadaModal({
     vehiculo_id: "",
     caja_id: "",
     peso: "",
+    manifiesto: "",
+    remito: "",
     origen: "BALANZA",
   });
 
@@ -48,6 +50,8 @@ export default function EditPesadaModal({
       vehiculo_id: pesada.vehiculo_id || "",
       caja_id: pesada.caja_id || "",
       peso: pesada.peso_bruto_kg || "",
+      manifiesto: pesada.nro_manifiesto || "",
+      remito: pesada.nro_remito || "",
       origen: pesada.origen || "BALANZA",
     });
 
@@ -132,6 +136,8 @@ export default function EditPesadaModal({
         material_general_id: form.material_general_id ? Number(form.material_general_id) : null,
         vehiculo_id: form.vehiculo_id ? Number(form.vehiculo_id) : null,
         caja_id: form.caja_id ? Number(form.caja_id) : null,
+        nro_manifiesto: form.manifiesto || null,
+        nro_remito: form.remito || null,
       };
 
       if (form.origen === "MANUAL") {
@@ -274,6 +280,21 @@ export default function EditPesadaModal({
             onChange={handleChange}
             disabled={!puedeEditarPeso}
             placeholder="Peso"
+          />
+          <input
+            type="number"
+            name="manifiesto"
+            value={form.manifiesto}
+            onChange={handleChange}
+            placeholder="Manifiesto"
+          />
+
+          <input
+            type="number"
+            name="remito"
+            value={form.remito}
+            onChange={handleChange}
+            placeholder="Remito"
           />
 
           <div className="modal-footer">
