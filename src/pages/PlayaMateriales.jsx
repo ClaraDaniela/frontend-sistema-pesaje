@@ -216,15 +216,14 @@ export default function Descarga() {
 
     const payload = {
       pesada_id: pesadaSeleccionada,
-      responsable: 1,
-      usuario_id: user?.id ?? null, 
+      responsable: user?.id ?? null,
+      usuario_id: user?.id ?? null,
       comentarios,
       materiales: filas.map(f => ({
         material_id: Number(f.material_id),
         porcentaje: Number(f.porcentaje)
       }))
     };
-
     setGuardando(true);
     try {
       const res = await fetch("/api/descargas", {
