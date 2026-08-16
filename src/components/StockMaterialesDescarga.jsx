@@ -1,13 +1,60 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import api from "../services/api";
 import PesadasChart from "./PesadasChart";
-import {Download} from "lucide-react";
+import { Download, Filter, X } from "lucide-react";
 
 export default function StockMaterialesDescarga() {
 
   const [stock, setStock] = useState([]);
 
   const [loading, setLoading] = useState(false);
+  const [empresas, setEmpresas] = useState([]);
+  const [materialesDescarga, setMaterialesDescarga] = useState([]);
+
+  const [filtros, setFiltros] = useState({
+    fechaDesde: "",
+    fechaHasta: "",
+    clienteId: "",
+    materialDescargaId: "",
+  });
+
+  const buildParams = () => {
+    const params = {};
+
+    if (filtros.fechaDesde)
+      params.fechaDesde = filtros.fechaDesde;
+
+    if (filtros.fechaHasta)
+      params.fechaHasta = filtros.fechaHasta;
+
+    if (filtros.clienteId)
+      params.clienteId = filtros.clienteId;
+
+    if (filtros.materialDescargaId)
+      params.materialDescargaId = filtros.materialDescargaId;
+
+    return params;
+  };
+
+  const loadCatalogos = async () => {
+    try {
+
+      const [resEmpresas, resMaterialesDescarga] = await Promise.all([
+        api.get("/empresas"),
+        api.get("/materiales_descarga"),
+      ]);
+
+      setEmpresas(resEmpresas.data || []);
+      setMaterialesDescarga(resMaterialesDescarga.data || []);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+  };
+
+  const filtrosActivos = Object.values(filtros).some(v => v !== "");
 
   const nombreMaterial = (item) => {
     const categoria = item.categoria || 'N/A';
@@ -19,83 +66,76 @@ export default function StockMaterialesDescarga() {
     return name;
   };
 
+  const requestIdRef = useRef(0);
+
   const loadStock = async () => {
-
+    const currentRequestId = ++requestIdRef.current;
     try {
-
       setLoading(true);
-
-      const res = await api.get(
-        "/stock/descarga"
-      );
-
-      setStock(res.data || []);
-
+      const res = await api.get("/stock/descarga", { params: buildParams() });
+      if (currentRequestId === requestIdRef.current) {
+        setStock(res.data || []);
+      }
     } catch (error) {
-
-      console.error(
-        "Error cargando stock descarga:",
-        error
-      );
-
-      setStock([]);
-
+      console.error("Error cargando stock descarga:", error);
+      if (currentRequestId === requestIdRef.current) {
+        setStock([]);
+      }
     } finally {
-
-      setLoading(false);
-
+      if (currentRequestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
-
   };
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
+    let ignore = false;
 
-    loadStock();
+    const init = async () => {
+      await loadCatalogos();
+      if (!ignore) await loadStock();
+    };
+    init();
 
-  }, []);
+    return () => { ignore = true; };
+  }, []); 
+
+
 
   const descargarExcel = async () => {
-
     try {
 
       const res = await api.get(
         "/export/stock-descarga",
         {
-          responseType: "blob"
+          params: buildParams(),
+          responseType: "blob",
         }
       );
 
-      const url =
-        window.URL.createObjectURL(
-          new Blob([res.data])
-        );
+      const url = window.URL.createObjectURL(
+        new Blob([res.data])
+      );
 
-      const link =
-        document.createElement("a");
+      const link = document.createElement("a");
 
       link.href = url;
-
       link.setAttribute(
         "download",
         "stock_descarga.xlsx"
       );
 
       document.body.appendChild(link);
-
       link.click();
-
       link.remove();
 
     } catch (error) {
 
       console.error(error);
-
-      alert(
-        "No se pudo descargar el Excel"
-      );
+      alert("No se pudo descargar el Excel");
 
     }
-
   };
 
   const totalKg = stock.reduce(
@@ -103,10 +143,140 @@ export default function StockMaterialesDescarga() {
       acc + Number(item.stock_total || 0),
     0
   );
+  const aplicarFiltros = () => {
+    loadStock();
+  };
+
+  const limpiarFiltros = () => {
+    setFiltros({
+      fechaDesde: "",
+      fechaHasta: "",
+      clienteId: "",
+      materialDescargaId: "",
+    });
+  };
 
   return (
     <div>
+      <section className="pesadas-filtros-card">
 
+        <div className="section-header">
+          <Filter size={16} />
+          <div>
+            <div className="section-title">
+              Filtros
+            </div>
+            <div className="section-subtitle">
+              Filtrar stock de materiales
+            </div>
+          </div>
+        </div>
+
+        <div className="form-grid">
+
+          <div className="field-group">
+            <label>Desde</label>
+            <input
+              type="date"
+              value={filtros.fechaDesde}
+              onChange={(e) =>
+                setFiltros({
+                  ...filtros,
+                  fechaDesde: e.target.value
+                })
+              }
+            />
+          </div>
+
+          <div className="field-group">
+            <label>Hasta</label>
+            <input
+              type="date"
+              value={filtros.fechaHasta}
+              onChange={(e) =>
+                setFiltros({
+                  ...filtros,
+                  fechaHasta: e.target.value
+                })
+              }
+            />
+          </div>
+
+          <div className="field-group">
+            <label>Cliente</label>
+            <select
+              value={filtros.clienteId}
+              onChange={(e) =>
+                setFiltros({
+                  ...filtros,
+                  clienteId: e.target.value
+                })
+              }
+            >
+              <option value="">Todos</option>
+
+              {empresas.map((empresa) => (
+                <option key={empresa.id} value={empresa.id}>
+                  {empresa.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field-group">
+            <label>Material</label>
+            <select
+              value={filtros.materialDescargaId}
+              onChange={(e) =>
+                setFiltros({
+                  ...filtros,
+                  materialDescargaId: e.target.value,
+                })
+              }
+            >
+              <option value="">Todos</option>
+
+              {materialesDescarga.map((material) => (
+                <option
+                  key={material.id_materiales_descarga}
+                  value={material.id_materiales_descarga}
+                >
+                  {[
+                    material.tipo_material?.nombre,
+                    material.material_base?.nombre,
+                    material.forma_material?.nombre,
+                  ]
+                    .filter(Boolean)
+                    .join(" / ")}
+                </option>
+              ))}
+            </select>
+          </div>
+
+        </div>
+
+        <div className="footer-row">
+
+          <button
+            className="btn-verde btn-primary"
+            onClick={aplicarFiltros}
+          >
+            Aplicar filtros
+          </button>
+
+          {filtrosActivos && (
+            <button
+              className="btn-secundario btn-secondary"
+              onClick={limpiarFiltros}
+            >
+              <X size={14} />
+              Limpiar
+            </button>
+          )}
+
+        </div>
+
+      </section>
       {/* ================= GRAFICO ================= */}
 
       <section className="chart-card">
@@ -119,6 +289,7 @@ export default function StockMaterialesDescarga() {
             marginBottom: "15px",
           }}
         >
+
 
           <div>
 
@@ -218,8 +389,8 @@ export default function StockMaterialesDescarga() {
                         Number(item.stock_total) > 0
                           ? "green"
                           : Number(item.stock_total) < 0
-                          ? "red"
-                          : "gray",
+                            ? "red"
+                            : "gray",
                     }}
                   >
 
@@ -275,7 +446,7 @@ export default function StockMaterialesDescarga() {
 
       </section>
 
-    </div>
+    </div >
   );
 
 }

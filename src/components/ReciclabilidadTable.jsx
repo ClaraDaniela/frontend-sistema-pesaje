@@ -242,7 +242,7 @@ function ReciclabilidadTable() {
                   </ul>
                 </td>
                 <td>{descarga.comentarios || "—"}</td>
-                <td>{descarga.usuario_descarga || "—"}</td>
+                <td>{descarga.nombreusuario || descarga.usuario || descarga.usuario_descarga || "—"}</td>
               </tr>
             ))}
           </tbody>

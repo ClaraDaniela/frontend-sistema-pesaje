@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       host: true,
-      allowedHosts: ['oximetric-keiko-fustily.ngrok-free.dev'],
+      allowedHosts: ['limpness-fender-ecologist.ngrok-free.dev'],
       proxy: {
         '/api': {
           target: env.VITE_PROXY_TARGET || 'http://localhost:3000',
