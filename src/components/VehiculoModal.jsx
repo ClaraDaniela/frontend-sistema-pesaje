@@ -8,12 +8,12 @@ function VehiculoModal({ tipoVehiculoId, onClose, onSaved }) {
   const [tara, setTara] = useState("");
 
   const guardar = async () => {
-    if (!patente || !tara) return;
+    if (!patente) return;
 
     const res = await api.post("/vehiculos", {
       patente,
       descripcion,
-      tara_kg: tara,
+      tara_kg: tara ? Number(tara) : null,
       tipo_vehiculo_id: tipoVehiculoId,
     });
 

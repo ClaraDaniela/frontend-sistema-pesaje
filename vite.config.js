@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       host: true,
-      allowedHosts: ['limpness-fender-ecologist.ngrok-free.dev'],
+      allowedHosts: ['servieco.ddns.net'],
       proxy: {
         '/api': {
           target: env.VITE_PROXY_TARGET || 'http://localhost:3000',

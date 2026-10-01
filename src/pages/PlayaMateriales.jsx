@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import StockMaterialesDescargas from "../components/StockMaterialesDescarga";
 import ReciclabilidadTable from "../components/ReciclabilidadTable";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -26,7 +25,6 @@ function ToleranciaTag({ dentro, diferencia }) {
   );
 }
 
-
 function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onEliminar }) {
   const { tipos, combinaciones } = catalogos;
 
@@ -38,25 +36,47 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
     ).values()]
     : [];
 
-  const formasFiltradas = fila.tipo_id && fila.base_id
+  // Un tipo puede no tener ninguna material_base asociada (p. ej. DESTRUCCION).
+  // En ese caso el select de Material base no debe habilitarse.
+  const tipoSinBase = Boolean(fila.tipo_id) && basesFiltradas.length === 0;
+
+  // Con base: las formas cuelgan de tipo + base.
+  // Sin base (p. ej. FARMA/COSMÉTICA, ALIMENTOS/BEBIDAS): las formas cuelgan directo del tipo.
+  const formasFiltradas = tipoSinBase
     ? [...new Map(
       combinaciones
         .filter(c =>
           c.tipo_material_id === Number(fila.tipo_id) &&
-          c.material_base_id === Number(fila.base_id) &&
+          !c.material_base_id &&
           c.forma_material_id
         )
         .map(c => [c.forma_material_id, { id: c.forma_material_id, nombre: c.forma_nombre }])
     ).values()]
-    : [];
+    : (fila.tipo_id && fila.base_id
+      ? [...new Map(
+        combinaciones
+          .filter(c =>
+            c.tipo_material_id === Number(fila.tipo_id) &&
+            c.material_base_id === Number(fila.base_id) &&
+            c.forma_material_id
+          )
+          .map(c => [c.forma_material_id, { id: c.forma_material_id, nombre: c.forma_nombre }])
+      ).values()]
+      : []);
 
-  const comboId = fila.tipo_id && fila.base_id
+  const comboId = tipoSinBase
     ? (combinaciones.find(c =>
       c.tipo_material_id === Number(fila.tipo_id) &&
-      c.material_base_id === (fila.base_id ? Number(fila.base_id) : null) &&
+      !c.material_base_id &&
       c.forma_material_id === (fila.forma_id ? Number(fila.forma_id) : null)
     )?.id_materiales_descarga ?? null)
-    : null;
+    : (fila.tipo_id && fila.base_id
+      ? (combinaciones.find(c =>
+        c.tipo_material_id === Number(fila.tipo_id) &&
+        c.material_base_id === Number(fila.base_id) &&
+        c.forma_material_id === (fila.forma_id ? Number(fila.forma_id) : null)
+      )?.id_materiales_descarga ?? null)
+      : null);
 
   useEffect(() => {
     if (fila.material_id !== comboId) {
@@ -98,20 +118,22 @@ function FilaMaterial({ fila, index, pesoNeto, catalogos, onActualizar, onElimin
       <select
         style={sel}
         value={fila.base_id}
-        disabled={!fila.tipo_id}
+        disabled={!fila.tipo_id || tipoSinBase}
         onChange={e => {
           onActualizar(index, "base_id", e.target.value);
           onActualizar(index, "forma_id", "");
         }}
       >
-        <option value="" disabled hidden>Seleccionar Material base</option>
+        <option value="" disabled hidden>
+          {tipoSinBase ? "No aplica" : "Seleccionar Material base"}
+        </option>
         {basesFiltradas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
       </select>
 
       <select
         style={sel}
         value={fila.forma_id}
-        disabled={!fila.base_id || formasFiltradas.length === 0}
+        disabled={(!tipoSinBase && !fila.base_id) || formasFiltradas.length === 0}
         onChange={e => onActualizar(index, "forma_id", e.target.value)}
       >
         <option value="" disabled hidden>Seleccionar variante</option>
@@ -155,7 +177,7 @@ export default function Descarga() {
   const [pesadaSeleccionada, setPesadaSeleccionada] = useState(pesadaId || "");
   const [pesada, setPesada] = useState(null);
 
-  const [catalogos, setCatalogos] = useState({ tipos: [], bases: [], formas: [], combinaciones: [] });
+  const [catalogos, setCatalogos] = useState({ tipos: [], combinaciones: [] });
 
   const [filas, setFilas] = useState([{ tipo_id: "", base_id: "", forma_id: "", porcentaje: "", material_id: null }]);
   const [comentarios, setComentarios] = useState("");
@@ -177,23 +199,21 @@ export default function Descarga() {
   }, [pesadaSeleccionada]);
 
   useEffect(() => {
+    setFilas([{ tipo_id: "", base_id: "", forma_id: "", porcentaje: "", material_id: null }]);
+  }, [pesadaSeleccionada]);
+
+  useEffect(() => {
+    if (!pesada?.material_general_id) {
+      setCatalogos({ tipos: [], combinaciones: [] });
+      return;
+    }
     Promise.all([
-      fetch("/api/materiales_descarga/tipos").then(r => r.json()),
+      fetch(`/api/materiales_descarga/tipos?material_general_id=${pesada.material_general_id}`).then(r => r.json()),
       fetch("/api/materiales_descarga/combinaciones").then(r => r.json())
     ]).then(([tipos, combinaciones]) => {
-      const bases = [...new Map(
-        combinaciones
-          .filter(c => c.material_base_id)
-          .map(c => [c.material_base_id, { id: c.material_base_id, nombre: c.base_nombre }])
-      ).values()];
-      const formas = [...new Map(
-        combinaciones
-          .filter(c => c.forma_material_id)
-          .map(c => [c.forma_material_id, { id: c.forma_material_id, nombre: c.forma_nombre }])
-      ).values()];
-      setCatalogos({ tipos, bases, formas, combinaciones });
+      setCatalogos({ tipos, combinaciones });
     });
-  }, []);
+  }, [pesada?.material_general_id]);
 
   const actualizarFila = useCallback((index, campo, valor) => {
     setFilas(prev => {
@@ -288,16 +308,10 @@ export default function Descarga() {
         <button onClick={() => setActiveTab("cargar")} style={tabBtn("cargar")}>
           Cargar descarga
         </button>
-        <button onClick={() => setActiveTab("stock")} style={tabBtn("stock")}>
-          Stock descarga
-        </button>
         <button onClick={() => setActiveTab("reciclabilidad")} style={tabBtn("reciclabilidad")}>
           Registros de descarga
         </button>
       </div>
-
-      {/* ── tab stock ── */}
-      {activeTab === "stock" && <StockMaterialesDescargas />}
 
       {/* ── tab reciclabilidad ── */}
       {activeTab === "reciclabilidad" && <ReciclabilidadTable />}
@@ -370,8 +384,8 @@ export default function Descarga() {
                 textTransform: "uppercase",
                 letterSpacing: "0.05em",
               }}>
-                <span>Material base</span>
                 <span>Tipo de material</span>
+                <span>Material base</span>
                 <span>Forma del material</span>
                 <span style={{ textAlign: "right" }}>%</span>
                 <span style={{ textAlign: "right" }}>Kg</span>

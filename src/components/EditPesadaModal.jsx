@@ -27,9 +27,17 @@ export default function EditPesadaModal({
     vehiculo_id: "",
     caja_id: "",
     peso: "",
+    peso_declarado_kg: "",
     manifiesto: "",
     remito: "",
     origen: "BALANZA",
+  });
+
+  // ─── Materiales filtrados según Ingreso/Egreso ────────────────────────────
+  const materialesFiltrados = materiales.filter((m) => {
+    if (form.tipo_movimiento === "INGRESO") return m.aplica_ingreso === 1 || m.aplica_ingreso === true;
+    if (form.tipo_movimiento === "EGRESO") return m.aplica_egreso === 1 || m.aplica_egreso === true;
+    return true;
   });
 
   // ─── Carga inicial de tipos de vehículo ───────────────────────────────────
@@ -50,6 +58,7 @@ export default function EditPesadaModal({
       vehiculo_id: pesada.vehiculo_id || "",
       caja_id: pesada.caja_id || "",
       peso: pesada.peso_bruto_kg || "",
+      peso_declarado_kg: pesada.peso_declarado_kg ?? "",
       manifiesto: pesada.nro_manifiesto || "",
       remito: pesada.nro_remito || "",
       origen: pesada.origen || "BALANZA",
@@ -124,7 +133,23 @@ export default function EditPesadaModal({
   };
 
   const handleTipoMovimiento = (tipo) =>
-    setForm((prev) => ({ ...prev, tipo_movimiento: tipo }));
+    setForm((prev) => {
+      // Si el material actual no aplica al nuevo movimiento, lo reseteamos
+      const materialActual = materiales.find(
+        (m) => Number(m.id) === Number(prev.material_general_id)
+      );
+      const sigueSiendoValido = materialActual
+        ? tipo === "INGRESO"
+          ? materialActual.aplica_ingreso === 1 || materialActual.aplica_ingreso === true
+          : materialActual.aplica_egreso === 1 || materialActual.aplica_egreso === true
+        : false;
+
+      return {
+        ...prev,
+        tipo_movimiento: tipo,
+        material_general_id: sigueSiendoValido ? prev.material_general_id : "",
+      };
+    });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -138,6 +163,8 @@ export default function EditPesadaModal({
         caja_id: form.caja_id ? Number(form.caja_id) : null,
         nro_manifiesto: form.manifiesto || null,
         nro_remito: form.remito || null,
+        peso_declarado_kg:
+          form.peso_declarado_kg !== "" ? Number(form.peso_declarado_kg) : null,
       };
 
       if (form.origen === "MANUAL") {
@@ -173,129 +200,175 @@ export default function EditPesadaModal({
 
         <form onSubmit={handleSubmit}>
 
-          <div className="tipo-movimiento-toggle">
-            <button
-              type="button"
-              className={form.tipo_movimiento === "INGRESO" ? "active" : ""}
-              onClick={() => handleTipoMovimiento("INGRESO")}
-            >
-              Ingreso
-            </button>
-            <button
-              type="button"
-              className={form.tipo_movimiento === "EGRESO" ? "active" : ""}
-              onClick={() => handleTipoMovimiento("EGRESO")}
-            >
-              Egreso
-            </button>
+          <div className="campo">
+            <span className="campo-label">Tipo de movimiento</span>
+            <div className="tipo-movimiento-toggle">
+              <button
+                type="button"
+                className={form.tipo_movimiento === "INGRESO" ? "active" : ""}
+                onClick={() => handleTipoMovimiento("INGRESO")}
+              >
+                Ingreso
+              </button>
+              <button
+                type="button"
+                className={form.tipo_movimiento === "EGRESO" ? "active" : ""}
+                onClick={() => handleTipoMovimiento("EGRESO")}
+              >
+                Egreso
+              </button>
+            </div>
           </div>
 
-          <select
-            name="empresa_id"
-            value={String(form.empresa_id || "")}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>Empresa</option>
-            {empresasActivas.map((e) => (
-              <option key={e.id} value={String(e.id)}>
-                {e.nombre}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="personal_id"
-            value={String(form.personal_id || "")}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>Chofer</option>
-            {personalActivo.map((p) => (
-              <option key={p.id} value={String(p.id)}>
-                {p.nombre} {p.apellido}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="material_general_id"
-            value={form.material_general_id}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>Material</option>
-            {materiales.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.nombre}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="tipo_vehiculo_id"
-            value={form.tipo_vehiculo_id}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>Tipo vehículo</option>
-            {tiposVehiculo.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.nombre}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="vehiculo_id"
-            value={form.vehiculo_id}
-            onChange={handleChange}
-            disabled={!form.tipo_vehiculo_id}
-          >
-            <option value="" disabled hidden>
-              {form.tipo_vehiculo_id ? "Vehículo" : "Seleccioná un tipo primero"}
-            </option>
-            {vehiculos.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.patente}
-              </option>
-            ))}
-          </select>
-
-          {mostrarCaja && (
+          <label className="campo">
+            <span className="campo-label">Empresa</span>
             <select
-              name="caja_id"
-              value={form.caja_id}
+              name="empresa_id"
+              value={String(form.empresa_id || "")}
               onChange={handleChange}
             >
-              <option value="" disabled hidden>Caja</option>
-              {cajas.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.codigo}
+              <option value="" disabled hidden>Seleccionar empresa</option>
+              {empresasActivas.map((e) => (
+                <option key={e.id} value={String(e.id)}>
+                  {e.nombre}
                 </option>
               ))}
             </select>
+          </label>
+
+          <label className="campo">
+            <span className="campo-label">Chofer</span>
+            <select
+              name="personal_id"
+              value={String(form.personal_id || "")}
+              onChange={handleChange}
+            >
+              <option value="" disabled hidden>Seleccionar chofer</option>
+              {personalActivo.map((p) => (
+                <option key={p.id} value={String(p.id)}>
+                  {p.nombre} {p.apellido}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="campo">
+            <span className="campo-label">Material</span>
+            <select
+              name="material_general_id"
+              value={form.material_general_id}
+              onChange={handleChange}
+            >
+              <option value="" disabled hidden>Seleccionar material</option>
+              {materialesFiltrados.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nombre}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="campo">
+            <span className="campo-label">Tipo de vehículo</span>
+            <select
+              name="tipo_vehiculo_id"
+              value={form.tipo_vehiculo_id}
+              onChange={handleChange}
+            >
+              <option value="" disabled hidden>Seleccionar tipo de vehículo</option>
+              {tiposVehiculo.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.nombre}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="campo">
+            <span className="campo-label">Vehículo (patente)</span>
+            <select
+              name="vehiculo_id"
+              value={form.vehiculo_id}
+              onChange={handleChange}
+              disabled={!form.tipo_vehiculo_id}
+            >
+              <option value="" disabled hidden>
+                {form.tipo_vehiculo_id ? "Seleccionar vehículo" : "Seleccioná un tipo primero"}
+              </option>
+              {vehiculos.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.patente}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {mostrarCaja && (
+            <label className="campo">
+              <span className="campo-label">Caja</span>
+              <select
+                name="caja_id"
+                value={form.caja_id}
+                onChange={handleChange}
+              >
+                <option value="" disabled hidden>Seleccionar caja</option>
+                {cajas.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.codigo}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
 
-          <input
-            type="number"
-            name="peso"
-            value={form.peso}
-            onChange={handleChange}
-            disabled={!puedeEditarPeso}
-            placeholder="Peso"
-          />
-          <input
-            type="number"
-            name="manifiesto"
-            value={form.manifiesto}
-            onChange={handleChange}
-            placeholder="Manifiesto"
-          />
+          <label className="campo">
+            <span className="campo-label">
+              Peso bruto (kg){!puedeEditarPeso && " – tomado de la balanza"}
+            </span>
+            <input
+              type="number"
+              name="peso"
+              value={form.peso}
+              onChange={handleChange}
+              disabled={!puedeEditarPeso}
+              placeholder="Peso bruto"
+            />
+          </label>
 
-          <input
-            type="number"
-            name="remito"
-            value={form.remito}
-            onChange={handleChange}
-            placeholder="Remito"
-          />
+          <label className="campo">
+            <span className="campo-label">Peso declarado (kg)</span>
+            <input
+              type="number"
+              name="peso_declarado_kg"
+              value={form.peso_declarado_kg}
+              onChange={handleChange}
+              placeholder="Peso declarado"
+              min="0"
+              step="any"
+            />
+          </label>
+
+          <label className="campo">
+            <span className="campo-label">N° de manifiesto</span>
+            <input
+              type="number"
+              name="manifiesto"
+              value={form.manifiesto}
+              onChange={handleChange}
+              placeholder="Manifiesto"
+            />
+          </label>
+
+          <label className="campo">
+            <span className="campo-label">N° de remito</span>
+            <input
+              type="number"
+              name="remito"
+              value={form.remito}
+              onChange={handleChange}
+              placeholder="Remito"
+            />
+          </label>
 
           <div className="modal-footer">
             <button type="button" onClick={onClose}>Cancelar</button>

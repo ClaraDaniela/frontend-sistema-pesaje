@@ -20,6 +20,15 @@ const KPIS_INICIALES = {
   total_egreso: 0,
 };
 
+const CLASIFICACION_INICIAL = {
+  total_ingreso: 0,
+  total_clasificado: 0,
+  diferencia: 0,
+  por_tipo_material: [],
+  por_categoria_ingreso: [],
+  por_categoria_egreso: [],
+};
+
 export default function StockMaterialesGenerales() {
   // =========================================================
   // ESTADOS
@@ -64,6 +73,10 @@ export default function StockMaterialesGenerales() {
 
     return KPIS_INICIALES;
   });
+
+  const [clasificacion, setClasificacion] = useState(
+    CLASIFICACION_INICIAL
+  );
 
   const [filtros, setFiltros] = useState(
     FILTROS_INICIALES
@@ -179,15 +192,6 @@ export default function StockMaterialesGenerales() {
 
       const data = response.data || {};
 
-      console.log(
-        "========== STOCK TOTALES =========="
-      );
-
-      console.log(
-        "Respuesta API:",
-        data
-      );
-
       const nuevoKpis = {
         total_ingreso:
           Number(data.total_ingreso) || 0,
@@ -195,11 +199,6 @@ export default function StockMaterialesGenerales() {
         total_egreso:
           Number(data.total_egreso) || 0,
       };
-
-      console.log(
-        "KPIs que van a mostrarse:",
-        nuevoKpis
-      );
 
       /*
        * GUARDAMOS LOS DATOS.
@@ -234,6 +233,60 @@ export default function StockMaterialesGenerales() {
   };
 
   // =========================================================
+  // CLASIFICACION DE INGRESO
+  // =========================================================
+
+  const cargarClasificacion = async (filtrosActuales) => {
+    try {
+      const response = await api.get(
+        "/stock/clasificacion",
+        {
+          params:
+            buildParams(filtrosActuales),
+        }
+      );
+
+      const data = response.data || {};
+
+      setClasificacion({
+        total_ingreso:
+          Number(data.total_ingreso) || 0,
+
+        total_clasificado:
+          Number(data.total_clasificado) || 0,
+
+        diferencia:
+          Number(data.diferencia) || 0,
+
+        por_tipo_material: Array.isArray(
+          data.por_tipo_material
+        )
+          ? data.por_tipo_material
+          : [],
+
+        por_categoria_ingreso: Array.isArray(
+          data.por_categoria_ingreso
+        )
+          ? data.por_categoria_ingreso
+          : [],
+
+        por_categoria_egreso: Array.isArray(
+          data.por_categoria_egreso
+        )
+          ? data.por_categoria_egreso
+          : [],
+      });
+    } catch (error) {
+      console.error(
+        "Error cargando clasificación:",
+        error
+      );
+
+      setClasificacion(CLASIFICACION_INICIAL);
+    }
+  };
+
+  // =========================================================
   // CARGAR TODO
   // =========================================================
 
@@ -248,6 +301,7 @@ export default function StockMaterialesGenerales() {
       await Promise.all([
         cargarStock(filtrosActuales),
         cargarKpis(filtrosActuales),
+        cargarClasificacion(filtrosActuales),
       ]);
     } catch (error) {
       console.error(
@@ -668,6 +722,188 @@ export default function StockMaterialesGenerales() {
         </div>
 
       </div>
+
+      {/* =====================================================
+          CLASIFICACION DE INGRESO
+      ====================================================== */}
+
+      <section
+        className="table-card"
+        style={{ marginBottom: "16px" }}
+      >
+
+        <h2>Clasificación de ingreso</h2>
+
+        <div className="stats-grid">
+
+          <div className="stat-box stat-ok">
+            <span className="stat-label">
+              Total ingresado
+            </span>
+
+            <span className="stat-value">
+              {clasificacion.total_ingreso.toLocaleString(
+                "es-AR"
+              )}{" "}
+              kg
+            </span>
+          </div>
+
+          <div className="stat-box">
+            <span className="stat-label">
+              Total clasificado
+            </span>
+
+            <span className="stat-value">
+              {clasificacion.total_clasificado.toLocaleString(
+                "es-AR"
+              )}{" "}
+              kg
+            </span>
+          </div>
+
+          <div className="stat-box stat-bad">
+            <span className="stat-label">
+              Pendiente de clasificar
+            </span>
+
+            <span className="stat-value">
+              {clasificacion.diferencia.toLocaleString(
+                "es-AR"
+              )}{" "}
+              kg
+            </span>
+          </div>
+
+        </div>
+
+        {/* POR TIPO DE MATERIAL */}
+
+        <h3 style={{ marginTop: "20px" }}>
+          Por tipo de material
+        </h3>
+
+        {clasificacion.por_tipo_material.length === 0 ? (
+          <p>No hay datos</p>
+        ) : (
+          <table className="pesadas-table">
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Total (kg)</th>
+                <th>% del clasificado</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {clasificacion.por_tipo_material.map(
+                (item) => (
+                  <tr key={item.tipo_material}>
+                    <td>
+                      {item.tipo_material}
+                    </td>
+
+                    <td>
+                      {(
+                        Number(item.total_kg) || 0
+                      ).toLocaleString("es-AR")}{" "}
+                      kg
+                    </td>
+
+                    <td>
+                      {Number(item.porcentaje) || 0}%
+                    </td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+        )}
+
+        {/* CATEGORIAS INGRESO / EGRESO */}
+
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            flexWrap: "wrap",
+            marginTop: "20px",
+          }}
+        >
+
+          <div style={{ flex: "1", minWidth: "260px" }}>
+            <h3>Categorías de ingreso</h3>
+
+            {clasificacion.por_categoria_ingreso.length ===
+            0 ? (
+              <p>No hay datos</p>
+            ) : (
+              <table className="pesadas-table">
+                <thead>
+                  <tr>
+                    <th>Categoría</th>
+                    <th>Total (kg)</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {clasificacion.por_categoria_ingreso.map(
+                    (item) => (
+                      <tr key={item.categoria}>
+                        <td>{item.categoria}</td>
+
+                        <td>
+                          {(
+                            Number(item.total_kg) || 0
+                          ).toLocaleString("es-AR")}{" "}
+                          kg
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          <div style={{ flex: "1", minWidth: "260px" }}>
+            <h3>Categorías de egreso</h3>
+
+            {clasificacion.por_categoria_egreso.length ===
+            0 ? (
+              <p>No hay datos</p>
+            ) : (
+              <table className="pesadas-table">
+                <thead>
+                  <tr>
+                    <th>Categoría</th>
+                    <th>Total (kg)</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {clasificacion.por_categoria_egreso.map(
+                    (item) => (
+                      <tr key={item.categoria}>
+                        <td>{item.categoria}</td>
+
+                        <td>
+                          {(
+                            Number(item.total_kg) || 0
+                          ).toLocaleString("es-AR")}{" "}
+                          kg
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+        </div>
+
+      </section>
 
       {/* =====================================================
           GRAFICO
