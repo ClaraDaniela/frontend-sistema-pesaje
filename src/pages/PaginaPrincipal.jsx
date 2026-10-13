@@ -1,7 +1,7 @@
-{/*Aca es el componente de la pagina principal, se muestra luego del login, es el menu de seleccion*/}
+{/*Aca es el componente de la pagina principal, se muestra luego del login, es el menu de seleccion*/ }
 
 import { useNavigate } from "react-router-dom";
-import { FaWeightHanging, FaBoxes, FaIndustry, FaSignOutAlt, FaFileAlt, FaUserFriends } from "react-icons/fa";
+import { FaWeightHanging, FaBoxes, FaIndustry, FaSignOutAlt, FaFileAlt, FaUserFriends, FaMapMarkerAlt } from "react-icons/fa";
 import Logo from "../components/Logo";
 import "../styles/PaginaPrincipal.css";
 
@@ -15,6 +15,7 @@ export default function PaginaPrincipal({ user }) {
     inventario: ["ADMIN", "OPERADOR"].includes(rol),
     registros: ["ADMIN", "PORTERIA", "OPERADOR"].includes(rol),
     adminusuarios: ["ADMIN"].includes(rol),
+    ubicaciones: ["ADMIN"].includes(rol),
   };
 
   const handleLogout = () => {
@@ -53,6 +54,12 @@ export default function PaginaPrincipal({ user }) {
       icon: <FaUserFriends />,
       label: "Administración de Usuarios",
       to: "/admin-usuarios",
+    },
+    {
+      permiso: permisos.ubicaciones,
+      icon: <FaMapMarkerAlt />,
+      label: "Ubicación de trackers",
+      to: "/ubicaciones",
     },
   ];
 

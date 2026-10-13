@@ -9,6 +9,7 @@ import Registros from "./pages/Registros";
 import AdminUsuariosPanel from "./pages/AdminUsuariosPanel";
 import Login from "./components/Login";
 import "./styles/servieco.css"
+import LocationLogs from "./components/LocationLogs";
 
 function PrivateRoute({ isLogged, allowedRoles, user, children }) {
   if (!isLogged) return <Navigate to="/login" />;
@@ -119,6 +120,18 @@ function App() {
               allowedRoles={['ADMIN', 'OPERADOR']}
             >
               <PlayaMateriales />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ubicaciones"
+          element={
+            <PrivateRoute
+              isLogged={isLogged}
+              user={user}
+              allowedRoles={["ADMIN"]}
+            >
+              <LocationLogs />
             </PrivateRoute>
           }
         />
