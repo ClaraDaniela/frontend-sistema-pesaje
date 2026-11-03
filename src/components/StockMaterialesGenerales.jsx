@@ -35,18 +35,10 @@ export default function StockMaterialesGenerales() {
   // =========================================================
 
   const [stock, setStock] = useState([]);
-
   const [empresas, setEmpresas] = useState([]);
   const [materiales, setMateriales] = useState([]);
-
   const [loading, setLoading] = useState(false);
 
-  /*
-   * IMPORTANTE:
-   * Intentamos recuperar los últimos totales guardados.
-   * Esto evita que, si el componente se vuelve a montar,
-   * las tarjetas vuelvan a mostrar 0.
-   */
   const [kpis, setKpis] = useState(() => {
     try {
       const guardados = localStorage.getItem(
@@ -57,18 +49,12 @@ export default function StockMaterialesGenerales() {
         const datos = JSON.parse(guardados);
 
         return {
-          total_ingreso:
-            Number(datos.total_ingreso) || 0,
-
-          total_egreso:
-            Number(datos.total_egreso) || 0,
+          total_ingreso: Number(datos.total_ingreso) || 0,
+          total_egreso: Number(datos.total_egreso) || 0,
         };
       }
     } catch (error) {
-      console.error(
-        "Error leyendo KPIs guardados:",
-        error
-      );
+      console.error("Error leyendo KPIs guardados:", error);
     }
 
     return KPIS_INICIALES;
@@ -78,9 +64,7 @@ export default function StockMaterialesGenerales() {
     CLASIFICACION_INICIAL
   );
 
-  const [filtros, setFiltros] = useState(
-    FILTROS_INICIALES
-  );
+  const [filtros, setFiltros] = useState(FILTROS_INICIALES);
 
   // =========================================================
   // PARAMETROS
@@ -90,23 +74,19 @@ export default function StockMaterialesGenerales() {
     const params = {};
 
     if (filtrosActuales.fechaDesde) {
-      params.fechaDesde =
-        filtrosActuales.fechaDesde;
+      params.fechaDesde = filtrosActuales.fechaDesde;
     }
 
     if (filtrosActuales.fechaHasta) {
-      params.fechaHasta =
-        filtrosActuales.fechaHasta;
+      params.fechaHasta = filtrosActuales.fechaHasta;
     }
 
     if (filtrosActuales.clienteId) {
-      params.clienteId =
-        filtrosActuales.clienteId;
+      params.clienteId = filtrosActuales.clienteId;
     }
 
     if (filtrosActuales.materialId) {
-      params.materialId =
-        filtrosActuales.materialId;
+      params.materialId = filtrosActuales.materialId;
     }
 
     return params;
@@ -118,10 +98,7 @@ export default function StockMaterialesGenerales() {
 
   const cargarCatalogos = async () => {
     try {
-      const [
-        responseEmpresas,
-        responseMateriales,
-      ] = await Promise.all([
+      const [responseEmpresas, responseMateriales] = await Promise.all([
         api.get("/empresas"),
         api.get("/materiales"),
       ]);
@@ -138,10 +115,7 @@ export default function StockMaterialesGenerales() {
           : []
       );
     } catch (error) {
-      console.error(
-        "Error cargando catálogos:",
-        error
-      );
+      console.error("Error cargando catálogos:", error);
     }
   };
 
@@ -151,27 +125,15 @@ export default function StockMaterialesGenerales() {
 
   const cargarStock = async (filtrosActuales) => {
     try {
-      const response = await api.get(
-        "/stock/generales",
-        {
-          params:
-            buildParams(filtrosActuales),
-        }
-      );
+      const response = await api.get("/stock/generales", {
+        params: buildParams(filtrosActuales),
+      });
 
-      const datos = Array.isArray(
-        response.data
-      )
-        ? response.data
-        : [];
+      const datos = Array.isArray(response.data) ? response.data : [];
 
       setStock(datos);
     } catch (error) {
-      console.error(
-        "Error cargando stock:",
-        error
-      );
-
+      console.error("Error cargando stock:", error);
       setStock([]);
     }
   };
@@ -182,53 +144,25 @@ export default function StockMaterialesGenerales() {
 
   const cargarKpis = async (filtrosActuales) => {
     try {
-      const response = await api.get(
-        "/stock/totales",
-        {
-          params:
-            buildParams(filtrosActuales),
-        }
-      );
+      const response = await api.get("/stock/totales", {
+        params: buildParams(filtrosActuales),
+      });
 
       const data = response.data || {};
 
       const nuevoKpis = {
-        total_ingreso:
-          Number(data.total_ingreso) || 0,
-
-        total_egreso:
-          Number(data.total_egreso) || 0,
+        total_ingreso: Number(data.total_ingreso) || 0,
+        total_egreso: Number(data.total_egreso) || 0,
       };
 
-      /*
-       * GUARDAMOS LOS DATOS.
-       *
-       * Esto hace que si el componente se desmonta
-       * y vuelve a montarse, pueda recuperar los
-       * últimos valores correctos.
-       */
       localStorage.setItem(
         "stock_materiales_generales_kpis",
         JSON.stringify(nuevoKpis)
       );
 
-      /*
-       * Actualizamos React.
-       */
       setKpis(nuevoKpis);
     } catch (error) {
-      console.error(
-        "Error cargando KPIs:",
-        error
-      );
-
-      /*
-       * MUY IMPORTANTE:
-       * No hacemos setKpis(0).
-       *
-       * Si falla la petición, conservamos el último
-       * valor correcto que teníamos.
-       */
+      console.error("Error cargando KPIs:", error);
     }
   };
 
@@ -238,50 +172,28 @@ export default function StockMaterialesGenerales() {
 
   const cargarClasificacion = async (filtrosActuales) => {
     try {
-      const response = await api.get(
-        "/stock/clasificacion",
-        {
-          params:
-            buildParams(filtrosActuales),
-        }
-      );
+      const response = await api.get("/stock/clasificacion", {
+        params: buildParams(filtrosActuales),
+      });
 
       const data = response.data || {};
 
       setClasificacion({
-        total_ingreso:
-          Number(data.total_ingreso) || 0,
-
-        total_clasificado:
-          Number(data.total_clasificado) || 0,
-
-        diferencia:
-          Number(data.diferencia) || 0,
-
-        por_tipo_material: Array.isArray(
-          data.por_tipo_material
-        )
+        total_ingreso: Number(data.total_ingreso) || 0,
+        total_clasificado: Number(data.total_clasificado) || 0,
+        diferencia: Number(data.diferencia) || 0,
+        por_tipo_material: Array.isArray(data.por_tipo_material)
           ? data.por_tipo_material
           : [],
-
-        por_categoria_ingreso: Array.isArray(
-          data.por_categoria_ingreso
-        )
+        por_categoria_ingreso: Array.isArray(data.por_categoria_ingreso)
           ? data.por_categoria_ingreso
           : [],
-
-        por_categoria_egreso: Array.isArray(
-          data.por_categoria_egreso
-        )
+        por_categoria_egreso: Array.isArray(data.por_categoria_egreso)
           ? data.por_categoria_egreso
           : [],
       });
     } catch (error) {
-      console.error(
-        "Error cargando clasificación:",
-        error
-      );
-
+      console.error("Error cargando clasificación:", error);
       setClasificacion(CLASIFICACION_INICIAL);
     }
   };
@@ -294,20 +206,13 @@ export default function StockMaterialesGenerales() {
     setLoading(true);
 
     try {
-      /*
-       * Son consultas independientes.
-       * Una no puede borrar el resultado de la otra.
-       */
       await Promise.all([
         cargarStock(filtrosActuales),
         cargarKpis(filtrosActuales),
         cargarClasificacion(filtrosActuales),
       ]);
     } catch (error) {
-      console.error(
-        "Error general:",
-        error
-      );
+      console.error("Error general:", error);
     } finally {
       setLoading(false);
     }
@@ -320,17 +225,14 @@ export default function StockMaterialesGenerales() {
   useEffect(() => {
     const iniciar = async () => {
       await cargarCatalogos();
-
-      await cargarTodo(
-        FILTROS_INICIALES
-      );
+      await cargarTodo(FILTROS_INICIALES);
     };
 
     iniciar();
   }, []);
 
   // =========================================================
-  // FILTROS
+  // FILTROS & ACCIONES
   // =========================================================
 
   const aplicarFiltros = async () => {
@@ -338,20 +240,10 @@ export default function StockMaterialesGenerales() {
   };
 
   const limpiarFiltros = async () => {
-    const filtrosLimpios = {
-      ...FILTROS_INICIALES,
-    };
-
+    const filtrosLimpios = { ...FILTROS_INICIALES };
     setFiltros(filtrosLimpios);
-
-    await cargarTodo(
-      filtrosLimpios
-    );
+    await cargarTodo(filtrosLimpios);
   };
-
-  // =========================================================
-  // ACTUALIZAR
-  // =========================================================
 
   const actualizar = async () => {
     await cargarTodo(filtros);
@@ -363,72 +255,50 @@ export default function StockMaterialesGenerales() {
 
   const descargarExcel = async () => {
     try {
-      const response = await api.get(
-        "/export/stock-generales",
-        {
-          params:
-            buildParams(filtros),
+      const response = await api.get("/export/stock-generales", {
+        params: buildParams(filtros),
+        responseType: "blob",
+      });
 
-          responseType: "blob",
-        }
-      );
-
-      const blob = new Blob([
-        response.data,
-      ]);
-
-      const url =
-        window.URL.createObjectURL(
-          blob
-        );
-
-      const link =
-        document.createElement("a");
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
 
       link.href = url;
-
-      link.download =
-        "stock_generales.xlsx";
-
+      link.download = "stock_generales.xlsx";
       document.body.appendChild(link);
-
       link.click();
-
       link.remove();
-
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error(
-        "Error descargando Excel:",
-        error
-      );
-
-      alert(
-        "No se pudo descargar"
-      );
+      console.error("Error descargando Excel:", error);
+      alert("No se pudo descargar");
     }
   };
 
   // =========================================================
-  // TOTALES STOCK
+  // TOTALES Y CÁLCULOS
   // =========================================================
 
-  const totalKg = stock.reduce(
-    (total, item) => {
-      return (
-        total +
-        (Number(
-          item.stock_total
-        ) || 0)
-      );
-    },
+  const totalKg = stock.reduce((total, item) => {
+    return total + (Number(item.stock_total) || 0);
+  }, 0);
+
+  const totalCatIngreso = clasificacion.por_categoria_ingreso.reduce(
+    (acc, item) =>
+      acc + (Number(item.total_kg ?? item.total ?? item.peso ?? 0) || 0),
     0
   );
 
-  const filtrosActivos =
-    Object.values(filtros).some(
-      (valor) => valor !== ""
-    );
+  const totalCatEgreso = clasificacion.por_categoria_egreso.reduce(
+    (acc, item) =>
+      acc + (Number(item.total_kg ?? item.total ?? item.peso ?? 0) || 0),
+    0
+  );
+
+  const filtrosActivos = Object.values(filtros).some(
+    (valor) => valor !== ""
+  );
 
   // =========================================================
   // RENDER
@@ -436,17 +306,8 @@ export default function StockMaterialesGenerales() {
 
   return (
     <div>
-
-      {/* =====================================================
-          FILTROS
-      ====================================================== */}
-
-      <section
-        className="filter-card"
-        style={{
-          marginBottom: "16px",
-        }}
-      >
+      {/* FILTROS */}
+      <section className="filter-card" style={{ marginBottom: "16px" }}>
         <div
           style={{
             display: "flex",
@@ -456,10 +317,7 @@ export default function StockMaterialesGenerales() {
           }}
         >
           <Filter size={18} />
-
-          <h3 style={{ margin: 0 }}>
-            Filtros
-          </h3>
+          <h3 style={{ margin: 0 }}>Filtros</h3>
         </div>
 
         <div
@@ -470,9 +328,7 @@ export default function StockMaterialesGenerales() {
             alignItems: "flex-end",
           }}
         >
-
           {/* DESDE */}
-
           <div>
             <label
               style={{
@@ -483,24 +339,19 @@ export default function StockMaterialesGenerales() {
             >
               Desde
             </label>
-
             <input
               type="date"
-              value={
-                filtros.fechaDesde
-              }
+              value={filtros.fechaDesde}
               onChange={(e) =>
                 setFiltros({
                   ...filtros,
-                  fechaDesde:
-                    e.target.value,
+                  fechaDesde: e.target.value,
                 })
               }
             />
           </div>
 
           {/* HASTA */}
-
           <div>
             <label
               style={{
@@ -511,24 +362,19 @@ export default function StockMaterialesGenerales() {
             >
               Hasta
             </label>
-
             <input
               type="date"
-              value={
-                filtros.fechaHasta
-              }
+              value={filtros.fechaHasta}
               onChange={(e) =>
                 setFiltros({
                   ...filtros,
-                  fechaHasta:
-                    e.target.value,
+                  fechaHasta: e.target.value,
                 })
               }
             />
           </div>
 
           {/* CLIENTE */}
-
           <div>
             <label
               style={{
@@ -539,42 +385,25 @@ export default function StockMaterialesGenerales() {
             >
               Cliente
             </label>
-
             <select
-              value={
-                filtros.clienteId
-              }
+              value={filtros.clienteId}
               onChange={(e) =>
                 setFiltros({
                   ...filtros,
-                  clienteId:
-                    e.target.value,
+                  clienteId: e.target.value,
                 })
               }
             >
-              <option value="">
-                Todos
-              </option>
-
-              {empresas.map(
-                (empresa) => (
-                  <option
-                    key={empresa.id}
-                    value={
-                      empresa.id
-                    }
-                  >
-                    {
-                      empresa.nombre
-                    }
-                  </option>
-                )
-              )}
+              <option value="">Todos</option>
+              {empresas.map((empresa) => (
+                <option key={empresa.id} value={empresa.id}>
+                  {empresa.nombre}
+                </option>
+              ))}
             </select>
           </div>
 
           {/* MATERIAL */}
-
           <div>
             <label
               style={{
@@ -585,203 +414,105 @@ export default function StockMaterialesGenerales() {
             >
               Material
             </label>
-
             <select
-              value={
-                filtros.materialId
-              }
+              value={filtros.materialId}
               onChange={(e) =>
                 setFiltros({
                   ...filtros,
-                  materialId:
-                    e.target.value,
+                  materialId: e.target.value,
                 })
               }
             >
-              <option value="">
-                Todos
-              </option>
-
-              {materiales.map(
-                (material) => (
-                  <option
-                    key={material.id}
-                    value={
-                      material.id
-                    }
-                  >
-                    {
-                      material.nombre
-                    }
-                  </option>
-                )
-              )}
+              <option value="">Todos</option>
+              {materiales.map((material) => (
+                <option key={material.id} value={material.id}>
+                  {material.nombre}
+                </option>
+              ))}
             </select>
           </div>
 
           {/* APLICAR */}
-
           <button
             className="btn-verde"
-            onClick={
-              aplicarFiltros
-            }
+            onClick={aplicarFiltros}
             disabled={loading}
           >
-            {loading
-              ? "Cargando..."
-              : "Aplicar filtros"}
+            {loading ? "Cargando..." : "Aplicar filtros"}
           </button>
 
           {/* LIMPIAR */}
-
           {filtrosActivos && (
             <button
               className="btn-secundario"
-              onClick={
-                limpiarFiltros
-              }
+              onClick={limpiarFiltros}
               disabled={loading}
             >
               <X size={16} />
-
               Limpiar
             </button>
           )}
-
         </div>
       </section>
 
-      {/* =====================================================
-          TARJETAS
-      ====================================================== */}
-
+      {/* TARJETAS KPI */}
       <div className="stats-grid">
-
-        {/* TOTAL SISTEMA */}
-
         <div className="stat-box">
-          <span className="stat-label">
-            Total sistema
-          </span>
-
+          <span className="stat-label">Total sistema</span>
           <span className="stat-value">
-            {totalKg.toLocaleString(
-              "es-AR"
-            )}{" "}
-            kg
+            {totalKg.toLocaleString("es-AR")} kg
           </span>
         </div>
 
-        {/* MATERIALES */}
-
         <div className="stat-box">
-          <span className="stat-label">
-            Materiales
-          </span>
-
-          <span className="stat-value">
-            {stock.length}
-          </span>
+          <span className="stat-label">Materiales</span>
+          <span className="stat-value">{stock.length}</span>
         </div>
-
-        {/* INGRESADO */}
 
         <div className="stat-box stat-ok">
-          <span className="stat-label">
-            Total ingresado
-          </span>
-
-          <span
-            className="stat-value"
-            key={kpis.total_ingreso}
-          >
-            {kpis.total_ingreso.toLocaleString(
-              "es-AR"
-            )}{" "}
-            kg
+          <span className="stat-label">Total ingresado</span>
+          <span className="stat-value" key={kpis.total_ingreso}>
+            {kpis.total_ingreso.toLocaleString("es-AR")} kg
           </span>
         </div>
-
-        {/* EGRESADO */}
 
         <div className="stat-box stat-bad">
-          <span className="stat-label">
-            Total egresado
-          </span>
-
-          <span
-            className="stat-value"
-            key={kpis.total_egreso}
-          >
-            {kpis.total_egreso.toLocaleString(
-              "es-AR"
-            )}{" "}
-            kg
+          <span className="stat-label">Total egresado</span>
+          <span className="stat-value" key={kpis.total_egreso}>
+            {kpis.total_egreso.toLocaleString("es-AR")} kg
           </span>
         </div>
-
       </div>
 
-      {/* =====================================================
-          CLASIFICACION DE INGRESO
-      ====================================================== */}
-
-      <section
-        className="table-card"
-        style={{ marginBottom: "16px" }}
-      >
-
+      {/* CLASIFICACION DE INGRESO */}
+      <section className="table-card" style={{ marginBottom: "16px" }}>
         <h2>Clasificación de ingreso</h2>
 
         <div className="stats-grid">
-
           <div className="stat-box stat-ok">
-            <span className="stat-label">
-              Total ingresado
-            </span>
-
+            <span className="stat-label">Total ingresado</span>
             <span className="stat-value">
-              {clasificacion.total_ingreso.toLocaleString(
-                "es-AR"
-              )}{" "}
-              kg
+              {clasificacion.total_ingreso.toLocaleString("es-AR")} kg
             </span>
           </div>
 
           <div className="stat-box">
-            <span className="stat-label">
-              Total clasificado
-            </span>
-
+            <span className="stat-label">Total clasificado</span>
             <span className="stat-value">
-              {clasificacion.total_clasificado.toLocaleString(
-                "es-AR"
-              )}{" "}
-              kg
+              {clasificacion.total_clasificado.toLocaleString("es-AR")} kg
             </span>
           </div>
 
           <div className="stat-box stat-bad">
-            <span className="stat-label">
-              Pendiente de clasificar
-            </span>
-
+            <span className="stat-label">Pendiente de clasificar</span>
             <span className="stat-value">
-              {clasificacion.diferencia.toLocaleString(
-                "es-AR"
-              )}{" "}
-              kg
+              {clasificacion.diferencia.toLocaleString("es-AR")} kg
             </span>
           </div>
-
         </div>
 
         {/* POR TIPO DE MATERIAL */}
-
-        <h3 style={{ marginTop: "20px" }}>
-          Por tipo de material
-        </h3>
+        <h3 style={{ marginTop: "20px" }}>Por tipo de material</h3>
 
         {clasificacion.por_tipo_material.length === 0 ? (
           <p>No hay datos</p>
@@ -796,32 +527,26 @@ export default function StockMaterialesGenerales() {
             </thead>
 
             <tbody>
-              {clasificacion.por_tipo_material.map(
-                (item) => (
-                  <tr key={item.tipo_material}>
-                    <td>
-                      {item.tipo_material}
-                    </td>
+              {clasificacion.por_tipo_material.map((item, idx) => {
+                const materialNombre =
+                  item.tipo_material || item.material || "N/A";
+                const totalKgItem = Number(
+                  item.total_kg ?? item.total ?? item.peso ?? 0
+                );
 
-                    <td>
-                      {(
-                        Number(item.total_kg) || 0
-                      ).toLocaleString("es-AR")}{" "}
-                      kg
-                    </td>
-
-                    <td>
-                      {Number(item.porcentaje) || 0}%
-                    </td>
+                return (
+                  <tr key={item.tipo_material || idx}>
+                    <td>{materialNombre}</td>
+                    <td>{totalKgItem.toLocaleString("es-AR")} kg</td>
+                    <td>{Number(item.porcentaje) || 0}%</td>
                   </tr>
-                )
-              )}
+                );
+              })}
             </tbody>
           </table>
         )}
 
         {/* CATEGORIAS INGRESO / EGRESO */}
-
         <div
           style={{
             display: "flex",
@@ -830,12 +555,11 @@ export default function StockMaterialesGenerales() {
             marginTop: "20px",
           }}
         >
-
+          {/* CATEGORÍAS DE INGRESO */}
           <div style={{ flex: "1", minWidth: "260px" }}>
             <h3>Categorías de ingreso</h3>
 
-            {clasificacion.por_categoria_ingreso.length ===
-            0 ? (
+            {clasificacion.por_categoria_ingreso.length === 0 ? (
               <p>No hay datos</p>
             ) : (
               <table className="pesadas-table">
@@ -848,29 +572,50 @@ export default function StockMaterialesGenerales() {
 
                 <tbody>
                   {clasificacion.por_categoria_ingreso.map(
-                    (item) => (
-                      <tr key={item.categoria}>
-                        <td>{item.categoria}</td>
+                    (item, index) => {
+                      const categoriaNombre =
+                        item.categoria ||
+                        item.categoria_ingreso ||
+                        item.nombre ||
+                        "Sin categoría";
 
-                        <td>
-                          {(
-                            Number(item.total_kg) || 0
-                          ).toLocaleString("es-AR")}{" "}
-                          kg
-                        </td>
-                      </tr>
-                    )
+                      const totalKgItem = Number(
+                        item.total_kg ?? item.total ?? item.peso ?? 0
+                      );
+
+                      return (
+                        <tr key={item.id || item.categoria || index}>
+                          <td>{categoriaNombre}</td>
+                          <td>
+                            {totalKgItem.toLocaleString("es-AR")} kg
+                          </td>
+                        </tr>
+                      );
+                    }
                   )}
                 </tbody>
+
+                <tfoot>
+                  <tr>
+                    <td>
+                      <strong>TOTAL</strong>
+                    </td>
+                    <td>
+                      <strong>
+                        {totalCatIngreso.toLocaleString("es-AR")} kg
+                      </strong>
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             )}
           </div>
 
+          {/* CATEGORÍAS DE EGRESO */}
           <div style={{ flex: "1", minWidth: "260px" }}>
             <h3>Categorías de egreso</h3>
 
-            {clasificacion.por_categoria_egreso.length ===
-            0 ? (
+            {clasificacion.por_categoria_egreso.length === 0 ? (
               <p>No hay datos</p>
             ) : (
               <table className="pesadas-table">
@@ -883,62 +628,70 @@ export default function StockMaterialesGenerales() {
 
                 <tbody>
                   {clasificacion.por_categoria_egreso.map(
-                    (item) => (
-                      <tr key={item.categoria}>
-                        <td>{item.categoria}</td>
+                    (item, index) => {
+                      const categoriaNombre =
+                        item.categoria ||
+                        item.categoria_egreso ||
+                        item.nombre ||
+                        "Sin categoría";
 
-                        <td>
-                          {(
-                            Number(item.total_kg) || 0
-                          ).toLocaleString("es-AR")}{" "}
-                          kg
-                        </td>
-                      </tr>
-                    )
+                      const totalKgItem = Number(
+                        item.total_kg ?? item.total ?? item.peso ?? 0
+                      );
+
+                      return (
+                        <tr key={item.id || item.categoria || index}>
+                          <td>{categoriaNombre}</td>
+                          <td>
+                            {totalKgItem.toLocaleString("es-AR")} kg
+                          </td>
+                        </tr>
+                      );
+                    }
                   )}
                 </tbody>
+
+                <tfoot>
+                  <tr>
+                    <td>
+                      <strong>TOTAL</strong>
+                    </td>
+                    <td>
+                      <strong>
+                        {totalCatEgreso.toLocaleString("es-AR")} kg
+                      </strong>
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             )}
           </div>
-
         </div>
-
       </section>
 
-      {/* =====================================================
-          GRAFICO
-      ====================================================== */}
-
+      {/* GRAFICO */}
       <section className="chart-card">
-
         <div
           style={{
             display: "flex",
-            justifyContent:
-              "space-between",
+            justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "15px",
             gap: "10px",
             flexWrap: "wrap",
           }}
         >
-
           <div>
             <h2
               style={{
                 margin: 0,
                 display: "flex",
-                alignItems:
-                  "center",
+                alignItems: "center",
                 gap: "8px",
               }}
             >
-              <ChartNoAxesCombined
-                size={20}
-              />
-
-              Resumen materiales
-              generales
+              <ChartNoAxesCombined size={20} />
+              Resumen materiales generales
             </h2>
 
             <p
@@ -949,160 +702,86 @@ export default function StockMaterialesGenerales() {
               }}
             >
               Total sistema:{" "}
-
-              <strong>
-                {totalKg.toLocaleString(
-                  "es-AR"
-                )}{" "}
-                kg
-              </strong>
+              <strong>{totalKg.toLocaleString("es-AR")} kg</strong>
             </p>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-            }}
-          >
-
+          <div style={{ display: "flex", gap: "10px" }}>
             <button
               className="btn-secundario"
-              onClick={
-                actualizar
-              }
+              onClick={actualizar}
               disabled={loading}
             >
-              {loading
-                ? "Actualizando..."
-                : "Actualizar"}
+              {loading ? "Actualizando..." : "Actualizar"}
             </button>
 
-            <button
-              className="btn-verde"
-              onClick={
-                descargarExcel
-              }
-            >
+            <button className="btn-verde" onClick={descargarExcel}>
               <Download />
-
               Descargar Excel
             </button>
-
           </div>
-
         </div>
 
-        <PesadasChart
-          stock={stock}
-        />
-
+        <PesadasChart stock={stock} />
       </section>
 
-      {/* =====================================================
-          TABLA
-      ====================================================== */}
-
+      {/* TABLA STOCK ACTUAL */}
       <section className="table-card">
-
-        <h2>
-          Stock actual
-        </h2>
+        <h2>Stock actual</h2>
 
         {loading ? (
-          <p>
-            Cargando...
-          </p>
+          <p>Cargando...</p>
         ) : stock.length === 0 ? (
-          <p>
-            No hay datos
-          </p>
+          <p>No hay datos</p>
         ) : (
           <table className="pesadas-table">
-
             <thead>
               <tr>
-                <th>
-                  Material
-                </th>
-
-                <th>
-                  Stock sistema (kg)
-                </th>
+                <th>Material</th>
+                <th>Stock sistema (kg)</th>
               </tr>
             </thead>
 
             <tbody>
+              {stock.map((item) => {
+                const valor = Number(item.stock_total) || 0;
 
-              {stock.map(
-                (item) => {
-                  const valor =
-                    Number(
-                      item.stock_total
-                    ) || 0;
-
-                  return (
-                    <tr
-                      key={
-                        item.material_id
-                      }
-                    >
-                      <td>
-                        {
-                          item.material ||
-                          "N/A"
-                        }
-                      </td>
-
-                      <td>
-                        <span
-                          className={`stock-badge ${
-                            valor > 0
-                              ? "badge-ok"
-                              : valor < 0
-                              ? "badge-bad"
-                              : "badge-neutral"
-                          }`}
-                        >
-                          {valor.toLocaleString(
-                            "es-AR"
-                          )}{" "}
-                          kg
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                }
-              )}
-
+                return (
+                  <tr key={item.material_id}>
+                    <td>{item.material || "N/A"}</td>
+                    <td>
+                      <span
+                        className={`stock-badge ${
+                          valor > 0
+                            ? "badge-ok"
+                            : valor < 0
+                            ? "badge-bad"
+                            : "badge-neutral"
+                        }`}
+                      >
+                        {valor.toLocaleString("es-AR")} kg
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
 
             <tfoot>
               <tr>
-
+                <td>
+                  <strong>TOTAL</strong>
+                </td>
                 <td>
                   <strong>
-                    TOTAL
+                    {totalKg.toLocaleString("es-AR")} kg
                   </strong>
                 </td>
-
-                <td>
-                  <strong>
-                    {totalKg.toLocaleString(
-                      "es-AR"
-                    )}{" "}
-                    kg
-                  </strong>
-                </td>
-
               </tr>
             </tfoot>
-
           </table>
         )}
-
       </section>
-
     </div>
   );
 }

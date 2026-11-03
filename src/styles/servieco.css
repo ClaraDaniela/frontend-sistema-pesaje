@@ -10,14 +10,14 @@
   --gris-texto: #000;
   --gris-secundario: #333;
   --gris-placeholder: #4b5563;
-  --gris-borde: #010102;
+  --gris-borde: #cbd5e1; /* Borde neutro más suave */
   --blanco: #fff;
 
   --titulo: #000;
 }
 
 /* ===============================
-   RESET
+   RESET (Corregido - era `- {`)
    =============================== */
 * {
   box-sizing: border-box;
@@ -72,31 +72,6 @@ h3 {
   height: 100%;
   width: auto;
   object-fit: contain;
-}
-
-.topbar .btn-secundario {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  color: #111;
-  padding: 9px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
-}
-
-.topbar .btn-secundario:hover {
-  background: #f8fafc;
-  border-color: var(--azul-corp);
-  color: var(--azul-corp);
-}
-
-.topbar .btn-secundario:active {
-  transform: scale(0.98);
 }
 
 /* ===============================
@@ -219,7 +194,6 @@ textarea:focus {
 
 /* ===============================
    REACT-SELECT
-   (requiere classNamePrefix="rs" en cada <Select>)
    =============================== */
 .rs__control {
   min-height: 42px;
@@ -249,7 +223,7 @@ textarea:focus {
   align-items: center;
 }
 
-.select-with-btn>div {
+.select-with-btn > div {
   flex: 1;
 }
 
@@ -282,7 +256,7 @@ textarea:focus {
 }
 
 /* ===============================
-   TOGGLES (Ingreso/Egreso, Balanza/Manual)
+   TOGGLES
    =============================== */
 .toggle-group {
   display: flex;
@@ -306,7 +280,7 @@ textarea:focus {
   line-height: 1;
   border: none;
   border-radius: 0;
-  background: #e5e7eb;          /* NO seleccionado */
+  background: #e5e7eb;
   color: var(--gris-placeholder);
   cursor: pointer;
   font-size: 14px;
@@ -320,7 +294,7 @@ textarea:focus {
 }
 
 .toggle-btn.active {
-  background: var(--azul-corp); /* SELECCIONADO */
+  background: var(--azul-corp);
   color: #fff;
   font-weight: 700;
 }
@@ -374,13 +348,14 @@ textarea:focus {
 }
 
 /* ===============================
-   BOTONES
+   BOTONES GENERALES Y ESTILOS
    =============================== */
 button {
   cursor: pointer;
   border: none;
   border-radius: 8px;
   font-weight: 600;
+  transition: all 0.15s ease-in-out;
 }
 
 .btn-block {
@@ -409,16 +384,38 @@ button {
   filter: brightness(1.05);
 }
 
+/* ===============================
+   BOTÓN SECUNDARIO / INICIO (GLOBAL)
+   =============================== */
+.btn-secundario,
 .btn-secondary {
-  background: white;
-  border: 1px solid var(--gris-borde);
-  color: var(--gris-texto);
-  padding: 10px 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #94a3b8;
+  color: var(--azul-corp);
+  padding: 9px 18px;
   border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  text-decoration: none;
 }
 
+.btn-secundario:hover,
 .btn-secondary:hover {
   background: var(--azul-soft);
+  border-color: var(--azul-corp);
+  color: var(--azul-corp);
+  box-shadow: 0 2px 6px rgba(31, 58, 95, 0.15);
+}
+
+.btn-secundario:active,
+.btn-secondary:active {
+  transform: translateY(1px);
 }
 
 .footer-row {
@@ -519,7 +516,6 @@ tr:hover {
     opacity: 0;
     transform: translateY(10px) scale(0.98);
   }
-
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -604,13 +600,22 @@ tr:hover {
    RESPONSIVE
    =============================== */
 @media (max-width: 768px) {
-
   .form-grid {
     grid-template-columns: 1fr;
   }
 
-  button {
+  /* Solo expande a 100% los botones de formularios y modales */
+  .form-grid button,
+  .modal-footer button,
+  .footer-row button {
     width: 100%;
+  }
+
+  /* Mantiene los botones de la barra superior/inicio en su tamaño natural */
+  .topbar .btn-secundario,
+  .btn-secundario,
+  .btn-secondary {
+    width: auto;
   }
 
   .toggle-btn {

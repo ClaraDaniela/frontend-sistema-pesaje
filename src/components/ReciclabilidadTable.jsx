@@ -67,38 +67,44 @@ function ReciclabilidadTable() {
     return [...set].sort();
   }, [reciclabilidadData]);
 
-  // Filtrado
+  // Filtrado + orden (más recientes arriba)
   const datosFiltrados = useMemo(() => {
-    return reciclabilidadData.filter((d) => {
-      const fechaDescarga = new Date(d.fecha_descarga);
+    return reciclabilidadData
+      .filter((d) => {
+        const fechaDescarga = new Date(d.fecha_descarga);
 
-      if (filtrosActivos.desde) {
-        const desde = new Date(filtrosActivos.desde);
-        desde.setHours(0, 0, 0, 0);
-        if (fechaDescarga < desde) return false;
-      }
+        if (filtrosActivos.desde) {
+          const desde = new Date(filtrosActivos.desde);
+          desde.setHours(0, 0, 0, 0);
+          if (fechaDescarga < desde) return false;
+        }
 
-      if (filtrosActivos.hasta) {
-        const hasta = new Date(filtrosActivos.hasta);
-        hasta.setHours(23, 59, 59, 999);
-        if (fechaDescarga > hasta) return false;
-      }
+        if (filtrosActivos.hasta) {
+          const hasta = new Date(filtrosActivos.hasta);
+          hasta.setHours(23, 59, 59, 999);
+          if (fechaDescarga > hasta) return false;
+        }
 
-      if (filtrosActivos.empresa && d.empresa !== filtrosActivos.empresa) return false;
+        if (filtrosActivos.empresa && d.empresa !== filtrosActivos.empresa) return false;
 
-      const nombreChofer = `${d.personal_nombre} ${d.personal_apellido}`;
-      if (filtrosActivos.chofer && nombreChofer !== filtrosActivos.chofer) return false;
+        const nombreChofer = `${d.personal_nombre} ${d.personal_apellido}`;
+        if (filtrosActivos.chofer && nombreChofer !== filtrosActivos.chofer) return false;
 
-      if (filtrosActivos.patente && d.patente !== filtrosActivos.patente) return false;
+        if (filtrosActivos.patente && d.patente !== filtrosActivos.patente) return false;
 
-      if (
-        filtrosActivos.material &&
-        d.material_general_pesada !== filtrosActivos.material
-      )
-        return false;
+        if (
+          filtrosActivos.material &&
+          d.material_general_pesada !== filtrosActivos.material
+        )
+          return false;
 
-      return true;
-    });
+        return true;
+      })
+      .sort((a, b) => {
+        const diff = new Date(b.fecha_descarga) - new Date(a.fecha_descarga);
+        // si tienen la misma fecha, el id más alto va primero
+        return diff !== 0 ? diff : b.id_descarga_detalles - a.id_descarga_detalles;
+      });
   }, [reciclabilidadData, filtrosActivos]);
 
   const handleChange = (e) => {

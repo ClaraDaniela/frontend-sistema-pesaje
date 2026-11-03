@@ -73,18 +73,26 @@ function calcularQuieto(logsDesc) {
 const fmtDia = (d) => (d ? new Date(d).toLocaleDateString('es-AR') : '-');
 const fmtFecha = (d) => (d ? new Date(d).toLocaleString('es-AR') : '-');
 
+// Solo la cantidad de días
+const textoQuieto = (q) => (q ? `${q.dias} ${q.dias === 1 ? 'día' : 'días'}` : null);
+
+// Los campos pueden venir en camelCase o snake_case según el modelo
+const tipoDe = (t) => t.tipoCaja ?? t.tipo_caja ?? '';
+const pesoDe = (t) => t.pesoCaja ?? t.peso_caja ?? '';
+const fmtPeso = (p) => (p === '' || p == null ? '-' : `${Number(p)} kg`);
+
 export default function LocationLogs() {
   const navigate = useNavigate();
   const [trackers, setTrackers] = useState([]);
-  const [logs, setLogs] = useState([]);        // logs de la tabla de abajo (con filtro)
+  const [logs, setLogs] = useState([]);           // logs de la tabla de abajo (con filtro)
   const [todosLogs, setTodosLogs] = useState([]); // historial completo, para el resumen
   const [filter, setFilter] = useState('');
   const [error, setError] = useState('');
 
   // Alta y edición de trackers
-  const [nuevo, setNuevo] = useState({ codigo: '', caja: '' });
+  const [nuevo, setNuevo] = useState({ codigo: '', caja: '', tipo: '', peso: '' });
   const [editId, setEditId] = useState(null);
-  const [cajaEdit, setCajaEdit] = useState('');
+  const [editData, setEditData] = useState({ caja: '', tipo: '', peso: '' });
 
   const cargarTrackers = async () => {
     try {
@@ -95,7 +103,7 @@ export default function LocationLogs() {
 
   const cargarTodosLogs = async () => {
     try {
-      const d = await api();
+      const d = await api('?limit=5000');
       setTodosLogs(Array.isArray(d) ? d : []);
     } catch (e) { setError(e.message); }
   };
@@ -145,25 +153,37 @@ export default function LocationLogs() {
     try {
       await api('/trackers', {
         method: 'POST',
-        body: JSON.stringify({ codigo: nuevo.codigo, patente: nuevo.caja }),
+        body: JSON.stringify({
+          codigo: nuevo.codigo,
+          patente: nuevo.caja,
+          tipoCaja: nuevo.tipo,
+          pesoCaja: nuevo.peso,
+        }),
       });
-      setNuevo({ codigo: '', caja: '' });
+      setNuevo({ codigo: '', caja: '', tipo: '', peso: '' });
       cargarTrackers();
     } catch (err) { setError(err.message); }
   };
 
   const empezarEdicion = (t) => {
     setEditId(t.id);
-    setCajaEdit(t.patente || '');
+    setEditData({ caja: t.patente || '', tipo: tipoDe(t), peso: pesoDe(t) });
   };
 
-  const guardarCaja = async (t) => {
-    const nueva = cajaEdit.trim().toUpperCase();
-    if (nueva === (t.patente || '')) { setEditId(null); return; }
-    if (!window.confirm('Al cambiar la caja, el contador de días quieto del tracker arranca de cero. ¿Continuar?')) return;
+  const guardarEdicion = async (t) => {
+    const nueva = editData.caja.trim().toUpperCase();
+    const cambioCaja = nueva !== (t.patente || '');
+    if (
+      cambioCaja &&
+      !window.confirm('Al cambiar la caja, el contador de días quieto del tracker arranca de cero. ¿Continuar?')
+    ) return;
+
     setError('');
     try {
-      await api(`/trackers/${t.id}`, { method: 'PUT', body: JSON.stringify({ patente: nueva }) });
+      await api(`/trackers/${t.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ patente: nueva, tipoCaja: editData.tipo, pesoCaja: editData.peso }),
+      });
       setEditId(null);
       cargarTrackers();
     } catch (err) { setError(err.message); }
@@ -199,6 +219,25 @@ export default function LocationLogs() {
               placeholder="Ej: C-12 (opcional)"
             />
           </div>
+          <div className="ub-field">
+            <label>Tipo de caja</label>
+            <input
+              value={nuevo.tipo}
+              onChange={(e) => setNuevo({ ...nuevo, tipo: e.target.value })}
+              placeholder="Opcional"
+            />
+          </div>
+          <div className="ub-field">
+            <label>Peso (kg)</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={nuevo.peso}
+              onChange={(e) => setNuevo({ ...nuevo, peso: e.target.value })}
+              placeholder="Opcional"
+            />
+          </div>
           <button className="ub-btn" type="submit">Agregar tracker</button>
         </form>
 
@@ -208,6 +247,8 @@ export default function LocationLogs() {
               <tr>
                 <th>Tracker</th>
                 <th>Caja</th>
+                <th>Tipo</th>
+                <th>Peso</th>
                 <th>Asociado desde</th>
                 <th>Días quieto</th>
                 <th>Última ubicación</th>
@@ -217,73 +258,91 @@ export default function LocationLogs() {
             </thead>
             <tbody>
               {resumen.length === 0 && (
-                <tr><td colSpan={7} className="ub-vacio">Todavía no hay trackers cargados</td></tr>
+                <tr><td colSpan={9} className="ub-vacio">Todavía no hay trackers cargados</td></tr>
               )}
-              {resumen.map(({ t, ultimo, quieto }) => (
-                <tr key={t.id}>
-                  <td>{t.codigo}</td>
-                  <td>
-                    {editId === t.id ? (
-                      <input
-                        value={cajaEdit}
-                        onChange={(e) => setCajaEdit(e.target.value)}
-                        placeholder="Sin caja"
-                        autoFocus
-                      />
-                    ) : (
-                      t.patente || <span className="ub-vacio">Sin caja</span>
-                    )}
-                  </td>
-                  <td>{fmtDia(t.cajaDesde ?? t.caja_desde)}</td>
-                  <td>
-                    {quieto ? (
-                      quieto.dias > 0 ? (
+              {resumen.map(({ t, ultimo, quieto }) => {
+                const editando = editId === t.id;
+                return (
+                  <tr key={t.id}>
+                    <td>{t.codigo}</td>
+                    <td>
+                      {editando ? (
+                        <input
+                          value={editData.caja}
+                          onChange={(e) => setEditData({ ...editData, caja: e.target.value })}
+                          placeholder="Sin caja"
+                          autoFocus
+                        />
+                      ) : (
+                        t.patente || <span className="ub-vacio">Sin caja</span>
+                      )}
+                    </td>
+                    <td>
+                      {editando ? (
+                        <input
+                          value={editData.tipo}
+                          onChange={(e) => setEditData({ ...editData, tipo: e.target.value })}
+                        />
+                      ) : (
+                        tipoDe(t) || '-'
+                      )}
+                    </td>
+                    <td>
+                      {editando ? (
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={editData.peso}
+                          onChange={(e) => setEditData({ ...editData, peso: e.target.value })}
+                        />
+                      ) : (
+                        fmtPeso(pesoDe(t))
+                      )}
+                    </td>
+                    <td>{fmtDia(t.cajaDesde ?? t.caja_desde)}</td>
+                    <td>
+                      {quieto ? (
+                        <b>{textoQuieto(quieto)}</b>
+                      ) : (
+                        <span className="ub-vacio">Sin datos</span>
+                      )}
+                    </td>
+                    <td>
+                      {ultimo ? (
                         <>
-                          <b>{quieto.dias} día(s)</b>
-                          <br />
-                          <small className="ub-vacio">desde {fmtDia(quieto.desde)}</small>
+                          {ultimo.place || '-'}
+                          {ultimo.lat != null && (
+                            <>
+                              {' · '}
+                              <a
+                                href={`https://www.google.com/maps?q=${ultimo.lat},${ultimo.lng}`}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {ultimo.plusCode || 'Ver mapa'}
+                              </a>
+                            </>
+                          )}
                         </>
                       ) : (
-                        'Reciente'
-                      )
-                    ) : (
-                      <span className="ub-vacio">Sin datos</span>
-                    )}
-                  </td>
-                  <td>
-                    {ultimo ? (
-                      <>
-                        {ultimo.place || '-'}
-                        {ultimo.lat != null && (
-                          <>
-                            {' · '}
-                            <a
-                              href={`https://www.google.com/maps?q=${ultimo.lat},${ultimo.lng}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {ultimo.plusCode || 'Ver mapa'}
-                            </a>
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <span className="ub-vacio">Sin ubicaciones</span>
-                    )}
-                  </td>
-                  <td>{ultimo ? fmtFecha(ultimo.recordedAt) : '-'}</td>
-                  <td>
-                    {editId === t.id ? (
-                      <>
-                        <button className="ub-btn" onClick={() => guardarCaja(t)}>Guardar</button>{' '}
-                        <button className="ub-btn ub-btn--ghost" onClick={() => setEditId(null)}>Cancelar</button>
-                      </>
-                    ) : (
-                      <button className="ub-btn--icon" onClick={() => empezarEdicion(t)} title="Cambiar caja">✏️</button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                        <span className="ub-vacio">Sin ubicaciones</span>
+                      )}
+                    </td>
+                    <td>{ultimo ? fmtFecha(ultimo.recordedAt) : '-'}</td>
+                    <td>
+                      {editando ? (
+                        <>
+                          <button className="ub-btn" onClick={() => guardarEdicion(t)}>Guardar</button>{' '}
+                          <button className="ub-btn ub-btn--ghost" onClick={() => setEditId(null)}>Cancelar</button>
+                        </>
+                      ) : (
+                        <button className="ub-btn--icon" onClick={() => empezarEdicion(t)} title="Editar">✏️</button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
